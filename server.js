@@ -92,7 +92,6 @@ server.listen(myArgs.p || process.env.PORT || 8081,function(){ // -p flag to spe
 });
 
 io.on('connection',function(socket){
-    socket.join('updates');
     console.log('connection with ID '+socket.id);
     console.log(server.getNbConnected()+' already connected');
     socket.pings = [];
@@ -108,13 +107,13 @@ io.on('connection',function(socket){
         socket.latency = server.quickMedian(socket.pings.slice(0)); // quickMedian used the quickselect algorithm to compute the median of a list of values
     });
 
-    socket.on('init-world',function(data) {
-        if(!data.new) {
-            console.log(gs.getServerAssignment(socket,data.id));
-        }
-    });
+    // socket.on('init-world',function(data) {
+    //     if(!data.new) {
+    //         console.log(gs.getServerAssignment(socket,data.id));
+    //     }
+    // });
 
-    socket.on('prepare-world', function(data) {
+    socket.on('init-world', function(data) {
          if(!gs.mapReady) {
             socket.emit('wait');
             return;
@@ -163,10 +162,6 @@ server.sendInitializationPacket = function(socket,packet){
     packet = server.addStamp(packet);
     if(server.enableBinary) packet = Encoder.encode(packet,CoDec.initializationSchema);
     socket.emit('init',packet);
-};
-
-server.sendServerAssignment = function(socket, packet) {
-    socket.emit('server',packet);
 };
 
 server.sendUpdate = function(socketID,pkg){

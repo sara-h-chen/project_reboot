@@ -290,27 +290,6 @@ GameServer.loadPlayer = function(socket,id){
     });
 };
 
-GameServer.getServerAssignment = function(socket, id) {
-    GameServer.server.db.collection('players').findOne({_id: new ObjectId(id)}, function(err, doc) {
-        if(err) throw err;
-        if(!doc) {
-            GameServer.server.sendError(socket);
-            return;
-        }
-        var player = new Player();
-        var mongoID = doc._id.toString();
-        player.setIDs(mongoID,socket.id);
-        player.getDataFromDb(doc);
-        var location = {
-            'x': player.x,
-            'y': player.y
-        };
-        // TODO: Define the range of responsibility
-        // TODO: Define response on client side
-        GameServer.server.sendServerAssignment(socket, location);
-    })
-};
-
 GameServer.finalizePlayer = function(socket,player){
     GameServer.addPlayerID(socket.id,player.id);
     GameServer.embedPlayer(player);

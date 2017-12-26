@@ -16,7 +16,7 @@ Client.socket = io.connect();
 // whereas socket.onevent can be modified for our purpose!
 var onevent = Client.socket.onevent;
 Client.socket.onevent = function (packet) {
-    if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError'){
+    if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc'){
         Client.eventsQueue.push(packet);
     }else{
         onevent.call(this, packet);    // original call
@@ -90,6 +90,18 @@ Client.getName = function(){
     return localStorage.getItem('name');
 };
 
+Client.reconnect = function(port) {
+    io.connect('http://127.0.0.1:' + port);
+};
+
+// TODO: Figure out why this isn't working
+Client.socket.on('alloc',function(data) {
+    // io.disconnect();
+    console.log(data);
+    console.log('***********');
+    // Client.reconnect(data);
+});
+
 Client.socket.on('pid',function(playerID){ // the 'pid' event is used for the server to tell the client what is the ID of the player
     Client.setLocalData(playerID);
 });
@@ -133,9 +145,6 @@ Client.socket.on('chat',function(data){
     Game.playerSays(data.id,data.txt);
 });
 
-Client.socket.on('server', function(data) {
-    
-});
 
 Client.sendPath = function(path,action,finalOrientation){
     // Send the path that the player intends to travel
