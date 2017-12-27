@@ -15,9 +15,16 @@ Client.socket = io.connect();
 // The original socket.onevent function is copied to onevent. That way, onevent can be used to call the origianl function,
 // whereas socket.onevent can be modified for our purpose!
 var onevent = Client.socket.onevent;
+
 Client.socket.onevent = function (packet) {
-    if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc'){
+    // if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc'){
+    console.log(Client.socket);
+    console.log(packet);
+    console.log(Client.eventsQueue);
+    if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc' && packet.data[0] != 'test'){
+        console.log('&&&&&&&& queued');
         Client.eventsQueue.push(packet);
+        console.log(Client.eventsQueue);
     }else{
         onevent.call(this, packet);    // original call
     }
@@ -90,16 +97,11 @@ Client.getName = function(){
     return localStorage.getItem('name');
 };
 
-Client.reconnect = function(port) {
-    io.connect('http://127.0.0.1:' + port);
-};
-
-// TODO: Figure out why this isn't working
-Client.socket.on('alloc',function(data) {
-    // io.disconnect();
-    console.log(data);
-    console.log('***********');
-    // Client.reconnect(data);
+Client.socket.on('alloc',function(port) {
+    Client.socket.disconnect();
+    console.log('Disconnected from gate.');
+    Client.socket = io.connect('http://127.0.0.1:' + port);
+    Client.requestData();
 });
 
 Client.socket.on('pid',function(playerID){ // the 'pid' event is used for the server to tell the client what is the ID of the player
@@ -107,10 +109,15 @@ Client.socket.on('pid',function(playerID){ // the 'pid' event is used for the se
 });
 
 Client.socket.on(Client.initEventName,function(data){ // This event triggers when receiving the initialization packet from the server, to use in Game.initWorld()
+    console.log('Received init response', data);
     if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.initializationSchema); // if in binary format, decode first
     Client.socket.emit('ponq',data.stamp); // send back a pong stamp to compute latency
     Game.initWorld(data);
     Game.updateNbConnected(data.nbconnected);
+});
+
+Client.socket.on('test',function(data){
+    console.log('Received init response', data);
 });
 
 Client.socket.on('update',function(data){ // This event triggers uppon receiving an update packet (data)

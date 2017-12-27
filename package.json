@@ -29,6 +29,7 @@
     "pathfinding": "^0.4.18",
     "quickselect": "^1.0.0",
     "random-weighted-choice": "^0.1.3",
-    "socket.io": "^1.7.2"
+    "socket.io": "^1.7.2",
+    "socket.io-client": "^0.9.16"
   }
 }

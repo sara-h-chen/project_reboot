@@ -112,13 +112,17 @@ io.on('connection',function(socket){
         }
     });
 
+    socket.on('disconnect',function(){
+        socket.disconnect();
+        console.log('Disconnection with ID '+socket.id);
+    });
+
 });
 
 var getServerAssignment = function(socket, id) {
     server.db.collection('players').findOne({_id: new ObjectId(id)}, function(err, doc) {
         if(err) throw err;
         if(!doc) {
-            // TODO: Create new player and assign to random server
             return;
         }
         var location = {

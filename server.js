@@ -37,7 +37,7 @@ var gs = require('./js/server/GameServer.js').GameServer;
 var CoDec = require('./js/CoDec.js').CoDec;
 var Encoder = require('./js/server/Encoder.js').Encoder;
 
-server.enableBinary = true;
+server.enableBinary = false;
 gs.server = server;
 
 app.use('/css',express.static(__dirname + '/css'));
@@ -78,7 +78,7 @@ if(myArgs.heroku){ // --heroku flag to behave according to Heroku's specs
     mongoDBName = 'phaserQuest';
 }
 
-server.listen(myArgs.p || process.env.PORT || 8081,function(){ // -p flag to specify port ; the env variable is needed for Heroku
+server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to specify port ; the env variable is needed for Heroku
     console.log('Listening on '+server.address().port);
     server.clientUpdateRate = 1000/5; // Rate at which update packets are sent
     gs.readMap();
@@ -107,14 +107,9 @@ io.on('connection',function(socket){
         socket.latency = server.quickMedian(socket.pings.slice(0)); // quickMedian used the quickselect algorithm to compute the median of a list of values
     });
 
-    // socket.on('init-world',function(data) {
-    //     if(!data.new) {
-    //         console.log(gs.getServerAssignment(socket,data.id));
-    //     }
-    // });
-
     socket.on('init-world', function(data) {
-         if(!gs.mapReady) {
+        console.log(data);
+        if(!gs.mapReady) {
             socket.emit('wait');
             return;
         }
@@ -123,7 +118,9 @@ io.on('connection',function(socket){
             gs.addNewPlayer(socket,data);
         }else{
             if(!gs.checkPlayerID(data.id)) return;
-            gs.loadPlayer(socket,data.id);
+            // gs.loadPlayer(socket,data.id);
+            socket.emit('test');
+            console.log('----------->> response sent');
         }
     });
 
@@ -161,7 +158,8 @@ server.setUpdateLoop = function(){
 server.sendInitializationPacket = function(socket,packet){
     packet = server.addStamp(packet);
     if(server.enableBinary) packet = Encoder.encode(packet,CoDec.initializationSchema);
-    socket.emit('init',packet);
+    socket.emit('test', packet);
+    // socket.emit('init',packet);
 };
 
 server.sendUpdate = function(socketID,pkg){
