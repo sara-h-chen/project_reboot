@@ -18,13 +18,9 @@ var onevent = Client.socket.onevent;
 
 Client.socket.onevent = function (packet) {
     // if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc'){
-    console.log(Client.socket);
     console.log(packet);
-    console.log(Client.eventsQueue);
     if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc' && packet.data[0] != 'test'){
-        console.log('&&&&&&&& queued');
         Client.eventsQueue.push(packet);
-        console.log(Client.eventsQueue);
     }else{
         onevent.call(this, packet);    // original call
     }
@@ -101,6 +97,16 @@ Client.socket.on('alloc',function(port) {
     Client.socket.disconnect();
     console.log('Disconnected from gate.');
     Client.socket = io.connect('http://127.0.0.1:' + port);
+    onevent = Client.socket.onevent;
+    Client.socket.onevent = function (packet) {
+        // if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc'){
+        console.log(packet);
+        if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc' && packet.data[0] != 'test'){
+            Client.eventsQueue.push(packet);
+        }else{
+            onevent.call(this, packet);    // original call
+        }
+    };
     Client.requestData();
 });
 

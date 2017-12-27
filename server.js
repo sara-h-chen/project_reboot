@@ -108,6 +108,8 @@ io.on('connection',function(socket){
     });
 
     socket.on('init-world', function(data) {
+        socket.emit('alloc', 6053);
+        socket.emit('test', data);
         console.log(data);
         if(!gs.mapReady) {
             socket.emit('wait');
