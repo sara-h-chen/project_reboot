@@ -108,9 +108,6 @@ io.on('connection',function(socket){
     });
 
     socket.on('init-world', function(data) {
-        socket.emit('alloc', 6053);
-        socket.emit('test', data);
-        console.log(data);
         if(!gs.mapReady) {
             socket.emit('wait');
             return;
@@ -120,9 +117,7 @@ io.on('connection',function(socket){
             gs.addNewPlayer(socket,data);
         }else{
             if(!gs.checkPlayerID(data.id)) return;
-            // gs.loadPlayer(socket,data.id);
-            socket.emit('test');
-            console.log('----------->> response sent');
+            gs.loadPlayer(socket,data.id);
         }
     });
 
@@ -160,8 +155,8 @@ server.setUpdateLoop = function(){
 server.sendInitializationPacket = function(socket,packet){
     packet = server.addStamp(packet);
     if(server.enableBinary) packet = Encoder.encode(packet,CoDec.initializationSchema);
-    socket.emit('test', packet);
-    // socket.emit('init',packet);
+    // socket.emit('test', packet);
+    socket.emit('init',packet);
 };
 
 server.sendUpdate = function(socketID,pkg){

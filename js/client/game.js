@@ -392,6 +392,7 @@ Game.setLatency = function(latency){
 Game.initWorld = function(data){ // Initialize the game world based on the server data
     AOIutils.nbAOIhorizontal = data.nbAOIhorizontal;
     AOIutils.lastAOIid = data.lastAOIid;
+    console.log(AOIutils);
 
     Game.displayHero(data.player.x,data.player.y,data.player.id);
 

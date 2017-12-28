@@ -30,7 +30,7 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var fs = require('fs');
-
+var gs = require('./js/server/GameServer.js').GameServer;
 
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
@@ -78,11 +78,11 @@ if(myArgs.heroku){ // --heroku flag to behave according to Heroku's specs
 server.listen(myArgs.p || process.env.PORT || 8081,function(){ // -p flag to specify port ; the env variable is needed for Heroku
     console.log('Gate listening on '+server.address().port);
 
-    mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db){
-        if(err) throw(err);
-        server.db = db;
-        console.log('Connection to db established');
-    });
+    // mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db){
+    //     if(err) throw(err);
+    //     server.db = db;
+    //     console.log('Connection to db established');
+    // });
 });
 
 io.on('connection',function(socket){
@@ -100,12 +100,6 @@ io.on('connection',function(socket){
         socket.latency = server.quickMedian(socket.pings.slice(0)); // quickMedian used the quickselect algorithm to compute the median of a list of values
     });
 
-    // socket.on('init-world',function(data) {
-    //     if(!data.new) {
-    //         console.log(gs.getServerAssignment(socket,data.id));
-    //     }
-    // });
-
     socket.on('init-world', function(data) {
         if(!data.new) {
             getServerAssignment(socket, data.id);
@@ -120,17 +114,20 @@ io.on('connection',function(socket){
 });
 
 var getServerAssignment = function(socket, id) {
-    server.db.collection('players').findOne({_id: new ObjectId(id)}, function(err, doc) {
-        if(err) throw err;
-        if(!doc) {
-            return;
-        }
-        var location = {
-            'x': doc.x,
-            'y': doc.y
-        };
-        sendServerAssignment(socket, location);
-    })
+    mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db) {
+        if (err) throw(err);
+        db.collection('players').findOne({_id: new ObjectId(id)}, function(err, doc) {
+            if (err) throw err;
+            if (!doc) {
+                return;
+            }
+            var location = {
+                'x': doc.x,
+                'y': doc.y
+            };
+            sendServerAssignment(socket, location);
+        });
+    });
 };
 
 var sendServerAssignment = function(socket, location) {

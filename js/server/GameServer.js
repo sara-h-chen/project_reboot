@@ -568,7 +568,7 @@ GameServer.checkAction = function(player){
 GameServer.checkSave = function(player){
     // save the progress of the player if the distance to his last saved position is greater than 30,
     // but only if he's outdoor (x < 92). Saving position indoor might cause camera issues when reloading the game.
-    if(player.x < 92 && manhattanDistance(player.x,player.y,player.lastSavedPosition.x,player.lastSavedPosition.y) > 30){
+    if(player.x < 92 && manhattanDistance(player.x,player.y,player.lastSavedPosition.x,player.lastSavedPosition.y) > 5){
         GameServer.savePlayer(player);
     }
 };
