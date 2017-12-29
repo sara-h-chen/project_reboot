@@ -30,6 +30,14 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var fs = require('fs');
+
+/*
+ * 6050: Lava area at top
+ * 6051: Wasteland before final lava area
+ * 6052: Forest
+ * 6053: Starting area
+ * 6054: Beach
+ */
 var startingServer = 6053;
 
 var ObjectId = require('mongodb').ObjectId;
@@ -101,14 +109,10 @@ io.on('connection',function(socket){
     });
 
     socket.on('init-world', function(data) {
-        // if(!data.new) {
-            var callback = function(portNumber) {
-                sendAssignment(socket, portNumber);
-            };
-            getServerAssignment(data, callback);
-        // } else {
-        //     sendAssignment(socket, temp)
-        // }
+        var callback = function(portNumber) {
+            sendAssignment(socket, portNumber);
+        };
+        getServerAssignment(data, callback);
     });
 
     socket.on('disconnect',function(){
@@ -142,7 +146,6 @@ var serverAssignment = function(location) {
             }
         }
     }
-    // console.log('------------------->>', servers[key].port);
     return servers[key].port;
 };
 

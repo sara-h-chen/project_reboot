@@ -80,7 +80,7 @@ if(myArgs.heroku){ // --heroku flag to behave according to Heroku's specs
     mongoDBName = 'phaserQuest';
 }
 
-server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to specify port ; the env variable is needed for Heroku
+server.listen(myArgs.p || process.env.PORT || 6054,function(){ // -p flag to specify port ; the env variable is needed for Heroku
     console.log('Listening on '+server.address().port);
     server.clientUpdateRate = 1000/5; // Rate at which update packets are sent
     gs.readMap();
@@ -93,7 +93,7 @@ server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to spe
     });
 });
 
-io.on('connection',function(socket){
+io.sockets.on('connection',function(socket){
     console.log('connection with ID '+socket.id);
     console.log(server.getNbConnected()+' already connected');
     socket.pings = [];
@@ -121,10 +121,6 @@ io.on('connection',function(socket){
             if(!gs.checkPlayerID(data.id)) return;
             gs.loadPlayer(socket,data.id);
         }
-    });
-
-    socket.on('test', function() {
-        console.log('Test packet received');
     });
 
     socket.on('revive',function(){

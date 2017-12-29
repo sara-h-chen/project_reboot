@@ -5,7 +5,9 @@
 var fs = require('fs');
 var PF = require('pathfinding');
 var clone = require('clone'); // used to clone objects, essentially used for clonick update packets
-var rwc = require('random-weighted-choice'); // used to randomly decide which loot a monster should drop
+var rwc = require('random-weighted-choice'); // used to randomly decide which loot a monster should
+
+var servers = JSON.parse(fs.readFileSync(__dirname + '/../../assets/json/servers_alloc.json')).servers;
 
 var GameServer = {
     map: null, // object containing all the data about the world map
@@ -31,6 +33,12 @@ var GameServer = {
     players: {}, // map of all connected players, fetchable by id
     socketMap: {}, // map of socket id's to the player id's of the associated players
     IDmap: {} // map of player id's to their mondo db uid's
+};
+
+var serverAlloc = {
+    serverNumber: 3,
+    serverMin: 190,
+    serverMax: 249
 };
 
 module.exports.GameServer = GameServer;
@@ -455,7 +463,7 @@ GameServer.convertPath = function(p){
     return path;
 };
 
-GameServer.handlePath = function(path,action,orientation,socket){ // Processes a path sent by a client
+GameServer.handlePath = function(packet,path,action,orientation,socket){ // Processes a path sent by a client
     // Path is the array of tiles to travel through
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
@@ -500,6 +508,17 @@ GameServer.handlePath = function(path,action,orientation,socket){ // Processes a
         var monster = GameServer.monstersTable[action.id];
         if(monster.alive) player.setTarget(monster);
     }
+
+    // TODO: Forward the entire packet to another server?
+    if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
+        serverAlloc.enteredHandoverBoundary = true;
+        console.log(player);
+        console.log('emit to ', servers[serverAlloc.serverNumber + 1].port);
+    } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
+        serverAlloc.enteredHandoverBoundary = true;
+        console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
+    }
+
     if(player.inFight && action && action.action != 3) player.endFight();
     return true;
 };
