@@ -146,11 +146,6 @@ io.on('connection',function(socket){
         console.log('Disconnection with ID '+socket.id);
         if(gs.getPlayer(socket.id)) gs.removePlayer(socket.id);
     });
-
-    socket.on('create', function(data) {
-        console.log('Received create event' + data);
-
-    })
 });
 
 server.setUpdateLoop = function(){

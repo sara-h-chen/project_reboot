@@ -30,6 +30,7 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var fs = require('fs');
+var startingServer = 6053;
 
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
@@ -100,14 +101,14 @@ io.on('connection',function(socket){
     });
 
     socket.on('init-world', function(data) {
-        if(!data.new) {
+        // if(!data.new) {
             var callback = function(portNumber) {
                 sendAssignment(socket, portNumber);
             };
-            getServerAssignment(data.id, callback);
-        } else {
-            //sendAssignment(socket, temp)
-        }
+            getServerAssignment(data, callback);
+        // } else {
+        //     sendAssignment(socket, temp)
+        // }
     });
 
     socket.on('disconnect',function(){
@@ -117,22 +118,11 @@ io.on('connection',function(socket){
 
 });
 
-var getServerAssignment = function(id, callback) {
-    server.db.collection('players').findOne({_id: new ObjectId(id)}, function(err, doc) {
+var getServerAssignment = function(data, callback) {
+    server.db.collection('players').findOne({_id: new ObjectId(data.id)}, function(err, doc) {
         if (err) throw err;
         if (!doc) {
-            // if(!data.name || data.name.length == 0) return;
-            // var player = new Player(data.name);
-            // var document = player.dbTrim();
-            // GameServer.server.db.collection('players').insertOne(document,function(err){
-            //     if(err) throw err;
-            //     var mongoID = document._id.toString(); // The Mongo driver for NodeJS appends the _id field to the original object reference
-            //     player.setIDs(mongoID,socket.id);
-            //     GameServer.finalizePlayer(socket,player);
-            //     GameServer.server.sendID(socket,mongoID);
-            // });
-            // db.collection('players').insertOne()
-            return;
+            callback(startingServer);
         }
         var location = {
             'x': doc.x,
