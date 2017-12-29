@@ -30,7 +30,6 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var fs = require('fs');
-var gs = require('./js/server/GameServer.js').GameServer;
 
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
@@ -78,11 +77,11 @@ if(myArgs.heroku){ // --heroku flag to behave according to Heroku's specs
 server.listen(myArgs.p || process.env.PORT || 8081,function(){ // -p flag to specify port ; the env variable is needed for Heroku
     console.log('Gate listening on '+server.address().port);
 
-    // mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db){
-    //     if(err) throw(err);
-    //     server.db = db;
-    //     console.log('Connection to db established');
-    // });
+    mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db){
+        if(err) throw(err);
+        server.db = db;
+        console.log('Connection to db established');
+    });
 });
 
 io.on('connection',function(socket){
@@ -102,7 +101,12 @@ io.on('connection',function(socket){
 
     socket.on('init-world', function(data) {
         if(!data.new) {
-            getServerAssignment(socket, data.id);
+            var callback = function(portNumber) {
+                sendAssignment(socket, portNumber);
+            };
+            getServerAssignment(data.id, callback);
+        } else {
+            //sendAssignment(socket, temp)
         }
     });
 
@@ -113,24 +117,33 @@ io.on('connection',function(socket){
 
 });
 
-var getServerAssignment = function(socket, id) {
-    mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db) {
-        if (err) throw(err);
-        db.collection('players').findOne({_id: new ObjectId(id)}, function(err, doc) {
-            if (err) throw err;
-            if (!doc) {
-                return;
-            }
-            var location = {
-                'x': doc.x,
-                'y': doc.y
-            };
-            sendServerAssignment(socket, location);
-        });
+var getServerAssignment = function(id, callback) {
+    server.db.collection('players').findOne({_id: new ObjectId(id)}, function(err, doc) {
+        if (err) throw err;
+        if (!doc) {
+            // if(!data.name || data.name.length == 0) return;
+            // var player = new Player(data.name);
+            // var document = player.dbTrim();
+            // GameServer.server.db.collection('players').insertOne(document,function(err){
+            //     if(err) throw err;
+            //     var mongoID = document._id.toString(); // The Mongo driver for NodeJS appends the _id field to the original object reference
+            //     player.setIDs(mongoID,socket.id);
+            //     GameServer.finalizePlayer(socket,player);
+            //     GameServer.server.sendID(socket,mongoID);
+            // });
+            // db.collection('players').insertOne()
+            return;
+        }
+        var location = {
+            'x': doc.x,
+            'y': doc.y
+        };
+        var port = serverAssignment(location);
+        callback(port);
     });
 };
 
-var sendServerAssignment = function(socket, location) {
+var serverAssignment = function(location) {
     var key;
     for (key in servers) {
         if (servers.hasOwnProperty(key)) {
@@ -139,5 +152,10 @@ var sendServerAssignment = function(socket, location) {
             }
         }
     }
-    socket.emit('alloc',servers[key].port);
+    // console.log('------------------->>', servers[key].port);
+    return servers[key].port;
+};
+
+var sendAssignment = function(socket, portNumber) {
+    socket.emit('alloc', portNumber);
 };

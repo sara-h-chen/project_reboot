@@ -6,13 +6,14 @@ We are now working on the static load balancing of the system. Each game server 
 
 ### To-Do List
 #### AI Behavior
-1. Create simple AI that wanders around in circles.
-2. Improve AI behavior.
+-[ ] Create simple AI that wanders around in circles.
+-[ ] Improve AI behavior.
 #### System Monitoring
-1. Establish a Master server that pulls workload information periodically from each server.
-2. Create web interface that displays this workload information, and plots graphically.
+-[ ] Establish a Master server that pulls workload information periodically from each server.
+-[ ] Create web interface that displays this workload information, and plots graphically.
 
 #### Static Load Balancing
-1. Set up gate server `gate.js` on port `8080`.
-2. Have the gate server allocate to a server based on the current location of the player, and the defined JSON `servers_alloc.json`.
-3. Coordinate the socket communications for handover.
+-[x] Set up gate server `gate.js` on port `8080`.
+-[x] Have the gate server allocate to a server based on the current location of the player, and the defined JSON `servers_alloc.json`.
+-[ ] Coordinate the socket communications for handover.
+-[ ] Allow gate to create new players.

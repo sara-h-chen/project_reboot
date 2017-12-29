@@ -7,7 +7,6 @@ var PF = require('pathfinding');
 var clone = require('clone'); // used to clone objects, essentially used for clonick update packets
 var rwc = require('random-weighted-choice'); // used to randomly decide which loot a monster should drop
 
-// TODO: Send updates with game state on all functions that require updating
 var GameServer = {
     map: null, // object containing all the data about the world map
     mapReady: false, // is the server done processing the map or not

@@ -7,8 +7,7 @@ var Client = {
     // and instead are queued in this array ; they will be processed once the client is initialized and Client.emptyQueue() has been called
     initEventName: 'init', // name of the event that triggers the call to initWorld() and the initialization of the game
     storageNameKey: 'playerName', // key in localStorage of the player name
-    storageIDKey: 'playerID', // key in localStorage of player ID
-    connectedToLogic: false
+    storageIDKey: 'playerID' // key in localStorage of player ID
 };
 Client.socket = io.connect();
 
@@ -19,7 +18,7 @@ var onevent = Client.socket.onevent;
 
 Client.socket.onevent = function (packet) {
     // if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc'){
-    console.log(packet);
+    // console.log(packet);
     if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc' && packet.data[0] != 'test'){
         Client.eventsQueue.push(packet);
     }else{
@@ -100,7 +99,7 @@ Client.socket.on('alloc',function(port) {
     console.log('Disconnected from gate.');
     Client.socket = io.connect('http://127.0.0.1:' + port + '/');
 
-    Client.connectedToLogic = true;
+    // Client.connectedToLogic = true;
     onevent = Client.socket.onevent;
     Client.requestData();
 
@@ -113,7 +112,7 @@ Client.socket.on('alloc',function(port) {
     });
 
     Client.socket.on(Client.initEventName,function(data){ // This event triggers when receiving the initialization packet from the server, to use in Game.initWorld()
-        console.log('Received init response', data);
+        // console.log('Received init response', data);
         if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.initializationSchema); // if in binary format, decode first
         Client.socket.emit('ponq',data.stamp); // send back a pong stamp to compute latency
         Game.initWorld(data);
