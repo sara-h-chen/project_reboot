@@ -30,8 +30,10 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var quickselect = require('quickselect'); // Used to compute the median for latency
-var redis = require('socket.io-redis');
-io.adapter(redis({host: 'localhost', port: 7000}));
+
+var redis = require('redis');
+var sub = redis.createClient();
+var pub = redis.createClient();
 
 var mapFormat = require('./js/server/format.js');
 var gs = require('./js/server/GameServer.js').GameServer;
@@ -80,9 +82,11 @@ if(myArgs.heroku){ // --heroku flag to behave according to Heroku's specs
     mongoDBName = 'phaserQuest';
 }
 
+// Specify port through command line with PORT=XXXX
 server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to specify port ; the env variable is needed for Heroku
     console.log('Listening on '+server.address().port);
     server.clientUpdateRate = 1000/5; // Rate at which update packets are sent
+    gs.setup(server.address().port);
     gs.readMap();
     server.setUpdateLoop();
 
@@ -92,6 +96,16 @@ server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to spe
         console.log('Connection to db established');
     });
 });
+
+var redisCallback = function(channel, message) {
+    console.log('redis received', channel, message);
+    // if(!gs.handlePath(pub,true,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
+};
+sub.on('message', redisCallback);
+
+if(server.address().port === 6054) {
+    sub.subscribe('startingBeach');
+}
 
 io.on('connection',function(socket){
     console.log('connection with ID '+socket.id);
@@ -132,7 +146,7 @@ io.on('connection',function(socket){
     });
 
     socket.on('path',function(data){
-        if(!gs.handlePath(data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
+        if(!gs.handlePath(pub,false,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
     });
 
     socket.on('chat',function(txt){

@@ -7,6 +7,7 @@ var PF = require('pathfinding');
 var clone = require('clone'); // used to clone objects, essentially used for clonick update packets
 var rwc = require('random-weighted-choice'); // used to randomly decide which loot a monster should
 
+// For the handover
 var servers = JSON.parse(fs.readFileSync(__dirname + '/../../assets/json/servers_alloc.json')).servers;
 
 var GameServer = {
@@ -34,12 +35,7 @@ var GameServer = {
     socketMap: {}, // map of socket id's to the player id's of the associated players
     IDmap: {} // map of player id's to their mondo db uid's
 };
-
-var serverAlloc = {
-    serverNumber: 3,
-    serverMin: 190,
-    serverMax: 249
-};
+var serverAlloc;
 
 module.exports.GameServer = GameServer;
 module.exports.randomInt = randomInt;
@@ -52,6 +48,23 @@ var AOI = require('./AOI.js').AOI;
 var Player = require('./Player.js').Player;
 var Monster = require('./Monster.js').Monster;
 var Item = require('./Item.js').Item;
+
+GameServer.setup = function(portNumber) {
+    var key;
+    for (key in servers) {
+        if (servers.hasOwnProperty(key)) {
+            if (servers[key].port == portNumber) {
+                serverAlloc = {
+                    serverNumber: Number(key),
+                    serverMin: servers[key].min_y,
+                    serverMax: servers[key].max_y
+                };
+                break;
+            }
+        }
+    }
+    // console.log(serverAlloc);
+};
 
 //A few helper functions
 GameServer.addPlayerID = function(socketID,playerID){ // map a socket id to a player id
@@ -463,7 +476,7 @@ GameServer.convertPath = function(p){
     return path;
 };
 
-GameServer.handlePath = function(packet,path,action,orientation,socket){ // Processes a path sent by a client
+GameServer.handlePath = function(redisPub,isRedis,packet,path,action,orientation,socket){ // Processes a path sent by a client
     // Path is the array of tiles to travel through
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
@@ -509,14 +522,17 @@ GameServer.handlePath = function(packet,path,action,orientation,socket){ // Proc
         if(monster.alive) player.setTarget(monster);
     }
 
-    // TODO: Forward the entire packet to another server?
+    // TODO: Disconnect client when they are out of bounds
     if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
-        serverAlloc.enteredHandoverBoundary = true;
-        console.log(player);
-        console.log('emit to ', servers[serverAlloc.serverNumber + 1].port);
+        if(!isRedis) {
+            redisPub.publish('startingBeach', packet);
+            console.log(player);
+            console.log('emit to ', servers[serverAlloc.serverNumber + 1].port);
+        }
     } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
-        serverAlloc.enteredHandoverBoundary = true;
-        console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
+        if(!isRedis) {
+            console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
+        }
     }
 
     if(player.inFight && action && action.action != 3) player.endFight();
