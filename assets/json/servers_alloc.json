@@ -3,27 +3,37 @@
     "0": {
       "min_y": 0,
       "max_y": 54,
-      "port": 6050
+      "port": 6050,
+      "topChannel": "",
+      "bottomChannel": "lavaWasteland"
     },
     "1": {
       "min_y": 55,
       "max_y": 139,
-      "port": 6051
+      "port": 6051,
+      "topChannel": "lavaWasteland",
+      "bottomChannel": "wastelandForest"
     },
     "2": {
       "min_y": 140,
       "max_y": 189,
-      "port": 6052
+      "port": 6052,
+      "topChannel": "wastelandForest",
+      "bottomChannel": "forestStarting"
     },
     "3": {
       "min_y": 190,
       "max_y": 249,
-      "port": 6053
+      "port": 6053,
+      "topChannel": "forestStarting",
+      "bottomChannel": "startingBeach"
     },
     "4": {
       "min_y": 249,
       "max_y": 350,
-      "port": 6054
+      "port": 6054,
+      "topChannel": "startingBeach",
+      "bottomChannel": ""
     }
   }
 }

@@ -21,6 +21,7 @@ function Player(name){
     this.equip(2,"clotharmor");
     this.updatePacket = new PersonalUpdatePacket();
     this.newAOIs = [];
+    this.isRedis = false;
 }
 
 Player.prototype = Object.create(MovingEntity.prototype); // Declares the inheritance relationship

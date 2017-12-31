@@ -6,6 +6,7 @@ var fs = require('fs');
 var PF = require('pathfinding');
 var clone = require('clone'); // used to clone objects, essentially used for clonick update packets
 var rwc = require('random-weighted-choice'); // used to randomly decide which loot a monster should
+var pup = require('./PersonalUpdatePacket');
 
 // For the handover
 var servers = JSON.parse(fs.readFileSync(__dirname + '/../../assets/json/servers_alloc.json')).servers;
@@ -57,7 +58,9 @@ GameServer.setup = function(portNumber) {
                 serverAlloc = {
                     serverNumber: Number(key),
                     serverMin: servers[key].min_y,
-                    serverMax: servers[key].max_y
+                    serverMax: servers[key].max_y,
+                    topOverlapChannel: servers[key].topChannel,
+                    bottomOverlapChannel: servers[key].bottomChannel
                 };
                 break;
             }
@@ -205,7 +208,7 @@ GameServer.setUpEntities = function(){ // Set up monsters & items
             GameServer.collisionGrid[position.y][position.x] = 1;
         } else if (entityInfo.item) {
             var item = new Item(position.x,position.y-1,entityInfo.sprite,true,false,false); // respawn, not chest, not loot
-            GameServer.addAtLocation(item);
+            GameServer.addAtLocation(false,item);
         } else if (entityInfo.monster) {
             GameServer.addMonster(position,entityInfo.sprite);
         }
@@ -217,7 +220,7 @@ GameServer.addMonster = function(position,sprite){ // Create a monster object an
     // sprite is the name of the sprite of the monster, which also works as its string key in the JSON
     var monster = new Monster(position.x,position.y,sprite);
     GameServer.monstersTable[monster.id] = monster;
-    GameServer.addAtLocation(monster);
+    GameServer.addAtLocation(false,monster);
 };
 
 GameServer.setUpChests = function(){ // Sets up chests and chest areas
@@ -225,7 +228,7 @@ GameServer.setUpChests = function(){ // Sets up chests and chest areas
         var chest = GameServer.objects.chests[d];
         var position = GameServer.computeTileCoords(chest.x, chest.y);
         var chest = new Item(position.x,position.y,chest.properties.items,true,true,false); // respawn, chest, not loot
-        GameServer.addAtLocation(chest);
+        GameServer.addAtLocation(false,chest);
     }
 
     // Chest areas are areas where a chest will spawn if all monsters are killed
@@ -281,7 +284,7 @@ GameServer.checkPlayerID = function(id){ // check if no other player is using sa
     return (GameServer.players[id] === undefined);
 };
 
-GameServer.addNewPlayer = function(socket,data){
+GameServer.addNewPlayer = function(isRedis,socket,data){
     // data is the data object sent by the client to request the creation of a new plaer
     if(!data.name || data.name.length == 0) return;
     var player = new Player(data.name);
@@ -290,8 +293,10 @@ GameServer.addNewPlayer = function(socket,data){
         if(err) throw err;
         var mongoID = document._id.toString(); // The Mongo driver for NodeJS appends the _id field to the original object reference
         player.setIDs(mongoID,socket.id);
-        GameServer.finalizePlayer(socket,player);
-        GameServer.server.sendID(socket,mongoID);
+        GameServer.finalizePlayer(isRedis,socket,player);
+        if(!isRedis) {
+            GameServer.server.sendID(socket,mongoID);
+        }
     });
 };
 
@@ -306,14 +311,20 @@ GameServer.loadPlayer = function(socket,id){
         var mongoID = doc._id.toString();
         player.setIDs(mongoID,socket.id);
         player.getDataFromDb(doc);
-        GameServer.finalizePlayer(socket,player);
+        GameServer.finalizePlayer(false,socket,player);
     });
 };
 
-GameServer.finalizePlayer = function(socket,player){
+GameServer.redisLoad = function(socket,player) {
+    GameServer.finalizePlayer(true,socket,player);
+};
+
+GameServer.finalizePlayer = function(isRedis,socket,player){
     GameServer.addPlayerID(socket.id,player.id);
-    GameServer.embedPlayer(player);
-    GameServer.server.sendInitializationPacket(socket,GameServer.createInitializationPacket(player.id));
+    GameServer.embedPlayer(isRedis,player);
+    if(!isRedis) {
+        GameServer.server.sendInitializationPacket(socket,GameServer.createInitializationPacket(player.id));
+    }
 };
 
 GameServer.createInitializationPacket = function(playerID){
@@ -326,11 +337,11 @@ GameServer.createInitializationPacket = function(playerID){
     };
 };
 
-GameServer.embedPlayer = function(player){
+GameServer.embedPlayer = function(isRedis,player){
     // Add the player to all the relevant data structures
     GameServer.players[player.id] = player;
     GameServer.nbConnectedChanged = true;
-    GameServer.addAtLocation(player);
+    GameServer.addAtLocation(isRedis,player);
     player.setLastSavedPosition();
 };
 
@@ -388,14 +399,14 @@ GameServer.getSpaceMap = function(entity){
     }
 };
 
-GameServer.addAtLocation = function(entity){
+GameServer.addAtLocation = function(isRedis,entity){
     // Add some entity to all the data structures related to position (i.e. the spaceMap of the category of the entity, and the AOI)
     var map = GameServer.getSpaceMap(entity);
     map.add(entity.x,entity.y,entity);
-    GameServer.AOIfromTiles.getFirst(entity.x,entity.y).addEntity(entity,null);
+    GameServer.AOIfromTiles.getFirst(entity.x,entity.y).addEntity(isRedis,entity,null);
 };
 
-GameServer.moveAtLocation = function(entity,fromX, fromY,toX,toY){
+GameServer.moveAtLocation = function(entity,fromX,fromY,toX,toY){
     // Update the position of an entity in all data structures related to position (spaceMap and AOI)
     var map = GameServer.getSpaceMap(entity);
     map.move(fromX, fromY, toX, toY, entity);
@@ -405,7 +416,7 @@ GameServer.moveAtLocation = function(entity,fromX, fromY,toX,toY){
         entity.setProperty('aoi',AOIto.id);
         var previousAOI = AOIfrom.id;
         AOIfrom.deleteEntity(entity);
-        AOIto.addEntity(entity,previousAOI);
+        AOIto.addEntity(false,entity,previousAOI);
     }
 };
 
@@ -476,7 +487,7 @@ GameServer.convertPath = function(p){
     return path;
 };
 
-GameServer.handlePath = function(redisPub,isRedis,packet,path,action,orientation,socket){ // Processes a path sent by a client
+GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation,socket){ // Processes a path sent by a client
     // Path is the array of tiles to travel through
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
@@ -515,28 +526,64 @@ GameServer.handlePath = function(redisPub,isRedis,packet,path,action,orientation
         }
     }
 
-    var departureTime = Date.now() - socket.latency; // Needed the corrected departure time for the update loop (updateWalk())
+    var time = Date.now();
+    var departureTime = time - socket.latency; // Needed the corrected departure time for the update loop (updateWalk())
     player.setRoute(path,departureTime,socket.latency,action,orientation);
     if(action && action.action == 3){ // fight
         var monster = GameServer.monstersTable[action.id];
         if(monster.alive) player.setTarget(monster);
     }
 
+    if(player.inFight && action && action.action != 3) player.endFight();
+
+    /*
+     * Prepare information to send to other server
+     */
+    var socketInfo = {
+        latency: socket.latency,
+        id: socket.id
+    };
+    var finalPacket = {
+        loggedTime: time,
+        oriPacket: originalPacket,
+        socket: socketInfo,
+        player: player
+    };
+    console.log('playerrrrrrrrrrrrrrrrr', player);
     // TODO: Disconnect client when they are out of bounds
     if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
-        if(!isRedis) {
-            redisPub.publish('startingBeach', packet);
-            console.log(player);
-            console.log('emit to ', servers[serverAlloc.serverNumber + 1].port);
-        }
+        redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
     } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
-        if(!isRedis) {
-            console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
-        }
+        console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
+    }
+    return true;
+};
+
+GameServer.handleRedis = function(data, player, socket, time) {
+    // Processes a path received on the Redis MQ
+    // Path is the array of tiles to travel through
+    // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
+    // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
+    var deserializedPlayer = deserializePlayer(player);
+    console.log('==============================', deserializedPlayer);
+
+    // if player is not in game state, load up
+    if(GameServer.checkPlayerID(player.id)) {
+        GameServer.redisLoad(socket, deserializedPlayer);
+        // console.log(deserializedPlayer);
     }
 
-    if(player.inFight && action && action.action != 3) player.endFight();
-    return true;
+    var departureTime = time - socket.latency; // Needed the corrected departure time for the update loop (updateWalk())
+    deserializedPlayer.setRoute(data.path,departureTime,socket.latency,data.action,data.or);
+    console.log('======================= moved ===============');
+    console.log(GameServer.players);
+
+    // // TODO: Disconnect client and destroy player when they are out of bounds
+    // if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
+    //     redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
+    // } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
+    //     console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
+    // }
 };
 
 GameServer.adjacent = function(A,B){
@@ -657,7 +704,7 @@ GameServer.dropLoot = function(table,x,y){
     if(itm && itm != 'none'){
         var item = new Item(x,y,itm,false,false,true);  // no respawn, not chest, loot
         item.makeTemporary();
-        GameServer.addAtLocation(item);
+        GameServer.addAtLocation(false,item);
     }
 };
 
@@ -665,7 +712,7 @@ GameServer.spawnHiddenChest = function(properties){ // If all the monsters in a 
     if(GameServer.items.getFirstFiltered(properties.x,properties.y,['visible'])) return;
     var chest = new Item(properties.x,properties.y,properties.items,false,true,false);  // no respawn, chest, not loot
     setTimeout(function(properties,chest){
-        GameServer.addAtLocation(chest);
+        GameServer.addAtLocation(false,chest);
     },500,properties,chest);
 };
 
@@ -693,22 +740,24 @@ GameServer.regenerate = function(){
 GameServer.updatePlayers = function(){ //Function responsible for setting up and sending update packets to clients
     Object.keys(GameServer.players).forEach(function(key) {
         var player = GameServer.players[key];
-        var localPkg = player.getIndividualUpdatePackage(); // the local pkg is player-specific
-        var globalPkg = GameServer.AOIs[player.aoi].getUpdatePacket(); // the global pkg is AOI-specific
-        var individualGlobalPkg = clone(globalPkg,false); // clone the global pkg to be able to modify it without affecting the original
-        // player.newAOIs is the list of AOIs about which the player hasn't checked for updates yet
-        for(var i = 0; i < player.newAOIs.length; i++){
-            individualGlobalPkg.synchronize(GameServer.AOIs[player.newAOIs[i]]); // fetch updates from the new AOIs
+        if (!player.isRedis) {
+            var localPkg = player.getIndividualUpdatePackage(); // the local pkg is player-specific
+            var globalPkg = GameServer.AOIs[player.aoi].getUpdatePacket(); // the global pkg is AOI-specific
+            var individualGlobalPkg = clone(globalPkg,false); // clone the global pkg to be able to modify it without affecting the original
+            // player.newAOIs is the list of AOIs about which the player hasn't checked for updates yet
+            for(var i = 0; i < player.newAOIs.length; i++){
+                individualGlobalPkg.synchronize(GameServer.AOIs[player.newAOIs[i]]); // fetch updates from the new AOIs
+            }
+            individualGlobalPkg.removeEcho(player.id); // remove redundant information from multiple update sources
+            if(individualGlobalPkg.isEmpty()) individualGlobalPkg = null;
+            if(individualGlobalPkg === null && localPkg === null && !GameServer.nbConnectedChanged) return;
+            var finalPackage = {};
+            if(individualGlobalPkg) finalPackage.global = individualGlobalPkg.clean();
+            if(localPkg) finalPackage.local = localPkg.clean();
+            if(GameServer.nbConnectedChanged) finalPackage.nbconnected = GameServer.server.getNbConnected();
+            GameServer.server.sendUpdate(player.socketID,finalPackage);
+            player.newAOIs = [];
         }
-        individualGlobalPkg.removeEcho(player.id); // remove redundant information from multiple update sources
-        if(individualGlobalPkg.isEmpty()) individualGlobalPkg = null;
-        if(individualGlobalPkg === null && localPkg === null && !GameServer.nbConnectedChanged) return;
-        var finalPackage = {};
-        if(individualGlobalPkg) finalPackage.global = individualGlobalPkg.clean();
-        if(localPkg) finalPackage.local = localPkg.clean();
-        if(GameServer.nbConnectedChanged) finalPackage.nbconnected = GameServer.server.getNbConnected();
-        GameServer.server.sendUpdate(player.socketID,finalPackage);
-        player.newAOIs = [];
     });
     GameServer.nbConnectedChanged = false;
     GameServer.clearAOIs(); // erase the update content of all AOIs that had any
@@ -728,7 +777,7 @@ GameServer.listAOIsFromSocket = function(socketID){
     return GameServer.getPlayer(socketID).listAdjacentAOIs(false);
 };
 
-GameServer.handleAOItransition = function(entity,previous){
+GameServer.handleAOItransition = function(isRedis,entity,previous){
     // When a player moves from one AOI to another, identify which AOIs should be notified and update them
     var AOIs = entity.listAdjacentAOIs(true);
     if(previous){
@@ -739,12 +788,14 @@ GameServer.handleAOItransition = function(entity,previous){
     }
     AOIs.forEach(function(aoi){
         if(entity.constructor.name == 'Player') entity.newAOIs.push(aoi); // list the new AOIs in the neighborhood, from which to pull updates
-        GameServer.addObjectToAOI(aoi,entity);
+        GameServer.addObjectToAOI(isRedis,aoi,entity);
     });
 };
 
-GameServer.addObjectToAOI = function(aoi,entity){
-    GameServer.AOIs[aoi].updatePacket.addObject(entity);
+GameServer.addObjectToAOI = function(isRedis,aoi,entity){
+    if(!isRedis) {
+        GameServer.AOIs[aoi].updatePacket.addObject(entity);
+    }
     GameServer.dirtyAOIs.add(aoi);
 };
 
@@ -774,11 +825,34 @@ function manhattanDistance(xA,yA,xB,yB){
     return Math.abs(xA-xB) + Math.abs(yA-yB);
 }
 
+function deserializePlayer(obj) {
+    var player = new Player(obj.name);
+    for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            // Create personal packet object
+            if(prop == 'updatePacket') {
+                var personalPacket = new pup.PersonalUpdatePacket();
+                for (var param in obj[prop]) {
+                    if (obj[prop].hasOwnProperty(param)) {
+                        personalPacket[param] = obj[prop][param];
+                    }
+                }
+                player[prop] = personalPacket;
+            }
+            player[prop] = obj[prop];
+        }
+    }
+    player['isRedis'] = true;
+    return player;
+}
+
 function getIDfromCoords(x,y){
     // Map x and y coordinates to the id of the AOI that the tile will belong to
     return Math.floor(x/GameServer.AOIwidth)+(AOIutils.nbAOIhorizontal*Math.floor(y/GameServer.AOIheight));
 }
 
 Array.prototype.diff = function(a) { // returns the elements in the array that are not in array a
-    return this.filter(function(i) {return a.indexOf(i) < 0;});
+    return this.filter(function(i) {
+        return a.indexOf(i) < 0;
+    });
 };

@@ -24,10 +24,12 @@ AOI.prototype.clear = function(){
     this.updatePacket = new UpdatePacket();
 };
 
-AOI.prototype.addEntity = function(entity,previous){
+AOI.prototype.addEntity = function(isRedis,entity,previous){
     this.entities.push(entity);
-    if(entity.constructor.name == 'Player') GameServer.server.addToRoom(entity.socketID,'AOI'+this.id);
-    GameServer.handleAOItransition(entity,previous);
+    if(!isRedis) {
+        if(entity.constructor.name == 'Player') GameServer.server.addToRoom(entity.socketID,'AOI'+this.id);
+    }
+    GameServer.handleAOItransition(isRedis,entity,previous);
 };
 
 AOI.prototype.deleteEntity = function(entity) {

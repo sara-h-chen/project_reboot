@@ -97,12 +97,24 @@ server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to spe
     });
 });
 
-var redisCallback = function(channel, message) {
-    console.log('redis received', channel, message);
-    // if(!gs.handlePath(pub,true,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
+/*
+ * Packet contains the original packet from the socket call
+ * and the socket ID, socket latency
+ * and the serialized player information
+ */
+var redisCallback = function(channel, packet) {
+    var received = JSON.parse(packet);
+
+    // Break down the packet into its components
+    var time = received.loggedTime;
+    var data = received.oriPacket;
+    var socket = received.socket;
+    var player = received.player;
+    gs.handleRedis(data, player, socket, time);
 };
 sub.on('message', redisCallback);
 
+// TODO: Refactor to read off the config
 if(server.address().port === 6054) {
     sub.subscribe('startingBeach');
 }
@@ -130,7 +142,7 @@ io.on('connection',function(socket){
         }
         if(data.new) {
             if(!gs.checkSocketID(socket.id)) return;
-            gs.addNewPlayer(socket,data);
+            gs.addNewPlayer(false,socket,data);
         }else{
             if(!gs.checkPlayerID(data.id)) return;
             gs.loadPlayer(socket,data.id);
@@ -146,7 +158,7 @@ io.on('connection',function(socket){
     });
 
     socket.on('path',function(data){
-        if(!gs.handlePath(pub,false,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
+        if(!gs.handlePath(pub,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
     });
 
     socket.on('chat',function(txt){

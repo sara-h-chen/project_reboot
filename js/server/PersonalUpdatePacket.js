@@ -8,6 +8,10 @@ function PersonalUpdatePacket(){
     this.used = []; // list of id's of items used/picked since last update
 }
 
+PersonalUpdatePacket.prototype.create = function() {
+    return new PersonalUpdatePacket();
+};
+
 PersonalUpdatePacket.prototype.isEmpty = function(){
     if(this.life !== undefined) return false; // current value of the health of the player
     if(this.x !== undefined) return false;
