@@ -149,6 +149,10 @@ io.on('connection',function(socket){
         }
     });
 
+    socket.on('transfer', function() {
+
+    });
+
     socket.on('test', function() {
         console.log('Test packet received');
     });

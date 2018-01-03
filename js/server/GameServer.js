@@ -549,14 +549,28 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         socket: socketInfo,
         player: player
     };
-    console.log('playerrrrrrrrrrrrrrrrr', player);
-    // TODO: Disconnect client when they are out of bounds
-    if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
+
+    if (path[path.length-1].y > (serverAlloc.serverMax - 25)) {
         redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
-    } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
-        console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
+    } else if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
+        redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
     }
+
+    // TODO: Disconnect, reconnect client and destroy player when they are out of bounds
+    // if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
+    //     redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
+    // } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
+    //     console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
+    // }
     return true;
+};
+
+GameServer.handleOutOfBounds = function(path,socket) {
+    if (path[path.length-1].y > serverAlloc.serverMax){
+
+    } else if (path[path.length-1].y < serverAlloc.serverMin) {
+        // TODO: Connect to adjacent server
+    }
 };
 
 GameServer.handleRedis = function(data, player, socket, time) {
@@ -565,25 +579,13 @@ GameServer.handleRedis = function(data, player, socket, time) {
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
     var deserializedPlayer = deserializePlayer(player);
-    console.log('==============================', deserializedPlayer);
-
-    // if player is not in game state, load up
-    if(GameServer.checkPlayerID(player.id)) {
-        GameServer.redisLoad(socket, deserializedPlayer);
-        // console.log(deserializedPlayer);
-    }
+    GameServer.redisLoad(socket, deserializedPlayer);
 
     var departureTime = time - socket.latency; // Needed the corrected departure time for the update loop (updateWalk())
     deserializedPlayer.setRoute(data.path,departureTime,socket.latency,data.action,data.or);
-    console.log('======================= moved ===============');
-    console.log(GameServer.players);
-
-    // // TODO: Disconnect client and destroy player when they are out of bounds
-    // if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
-    //     redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
-    // } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
-    //     console.log('emit to ', servers[serverAlloc.serverNumber - 1].port);
-    // }
+    // DEBUG
+    // console.log('======================= moved ===============');
+    // console.log(GameServer.players);
 };
 
 GameServer.adjacent = function(A,B){
