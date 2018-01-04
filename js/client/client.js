@@ -7,7 +7,8 @@ var Client = {
     // and instead are queued in this array ; they will be processed once the client is initialized and Client.emptyQueue() has been called
     initEventName: 'init', // name of the event that triggers the call to initWorld() and the initialization of the game
     storageNameKey: 'playerName', // key in localStorage of the player name
-    storageIDKey: 'playerID' // key in localStorage of player ID
+    storageIDKey: 'playerID', // key in localStorage of player ID
+    startup: true
 };
 Client.socket = io.connect();
 
@@ -95,13 +96,24 @@ Client.getName = function(){
 };
 
 Client.socket.on('alloc',function(port) {
+    Client.socketFunctions(port);
+});
+
+Client.socketFunctions = function(port) {
+    // DEBUG
+    // console.log('reallocated', port);
+    // console.log('Connecting to port ' + port);
     Client.socket.disconnect();
-    console.log('Disconnected from gate.');
+    console.log('Disconnected from server.');
     Client.socket = io.connect('http://127.0.0.1:' + port + '/');
 
-    // Client.connectedToLogic = true;
     onevent = Client.socket.onevent;
-    Client.requestData();
+
+    // Request initialization only once when disconnecting from the gate
+    if (Client.startup) {
+        Client.requestData();
+        Client.startup = false;
+    }
 
     Client.socket.on('test',function(data){
         console.log('Received init response', data);
@@ -150,7 +162,11 @@ Client.socket.on('alloc',function(port) {
         // chat is sent by the server when another nearby player has said something
         Game.playerSays(data.id,data.txt);
     });
-});
+
+    Client.socket.on('alloc', function(port) {
+        Client.socketFunctions(port);
+    });
+};
 
 Client.sendPath = function(path,action,finalOrientation){
     // Send the path that the player intends to travel

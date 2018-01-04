@@ -86,6 +86,11 @@ GameServer.getPlayer = function(socketID){ // returns the player corresponding t
     return GameServer.players[GameServer.getPlayerID(socketID)];
 };
 
+// Return player with new socket information
+GameServer.updateSocket = function(mongoID, oldSocketID, newSocketID) {
+    return GameServer.getPlayer(oldSocketID).setIDs(mongoID, newSocketID);
+};
+
 GameServer.deleteSocketID = function(socketID){ // remove a socket id/player id mapping
   delete GameServer.socketMap[socketID];
 };
@@ -315,6 +320,14 @@ GameServer.loadPlayer = function(socket,id){
     });
 };
 
+GameServer.transferPlayer = function(player) {
+    // TODO: Get player and reset the socket ID
+    // GameServer.deleteSocketID(player.oldSocket);
+    // GameServer.updateSocket(player.mongoID, player.oldSocket, player.newSocket);
+    // GameServer.addPlayerID(player.newSocket, player.ID);
+    GameServer.finalizePlayer(true,socket,player);
+};
+
 GameServer.redisLoad = function(socket,player) {
     GameServer.finalizePlayer(true,socket,player);
 };
@@ -326,6 +339,7 @@ GameServer.finalizePlayer = function(isRedis,socket,player){
         GameServer.server.sendInitializationPacket(socket,GameServer.createInitializationPacket(player.id));
     }
 };
+
 
 GameServer.createInitializationPacket = function(playerID){
     // Create the packet that the client will receive from the server in order to initialize the game
@@ -544,6 +558,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         id: socket.id
     };
     var finalPacket = {
+        toTransfer: false,
         loggedTime: time,
         oriPacket: originalPacket,
         socket: socketInfo,
@@ -556,7 +571,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
     }
 
-    // TODO: Disconnect, reconnect client and destroy player when they are out of bounds
+    // TODO: Destroy player when they are out of bounds
     // if (path[path.length-1].y > (serverAlloc.serverMax - 15)) {
     //     redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
     // } else if (path[path.length-1].y < (serverAlloc.serverMin + 15)) {
@@ -566,10 +581,13 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
 };
 
 GameServer.handleOutOfBounds = function(path,socket) {
+    // TODO: Send packet 'alloc' to client so they reconnect to another server
+    // TODO: Disconnect and reconnect to adjacent server, sending packet with 'transfer'
     if (path[path.length-1].y > serverAlloc.serverMax){
 
     } else if (path[path.length-1].y < serverAlloc.serverMin) {
         // TODO: Connect to adjacent server
+
     }
 };
 
