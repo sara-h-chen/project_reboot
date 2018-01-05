@@ -150,5 +150,8 @@ var serverAssignment = function(location) {
 };
 
 var sendAssignment = function(socket, portNumber) {
-    socket.emit('alloc', portNumber);
+    var packet = {
+        portNumber: portNumber
+    };
+    socket.emit('alloc', packet);
 };

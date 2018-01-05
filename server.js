@@ -104,16 +104,12 @@ server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to spe
  */
 var redisCallback = function(channel, packet) {
     var received = JSON.parse(packet);
-    if(!received.toTransfer) {
-        // Break down the packet into its components
-        var time = received.loggedTime;
-        var data = received.oriPacket;
-        var socket = received.socket;
-        var player = received.player;
-        gs.handleRedis(data, player, socket, time);
-    } else {
-
-    }
+    // Break down the packet into its components
+    var time = received.loggedTime;
+    var data = received.oriPacket;
+    var socketInfo = received.socketInfo;
+    var player = received.player;
+    gs.handleRedis(data, player, socketInfo, time);
 };
 sub.on('message', redisCallback);
 
@@ -152,21 +148,10 @@ io.on('connection',function(socket){
         }
     });
 
-    // Server to server transfer;
-    // remember that the client shouldn't see a difference
-    // transfer only after updating the game state
-    socket.on('transfer', function(player) {
-        // TODO: Change isRedis property for player
-        // TODO: Update player information in players, which is fetchable by ID
-        // TODO: Update socket information in Game State socketMap
-        // TODO: Update GameState IDmap
-        // gs.transferPlayer(player);
-    });
-
     // DEBUG
-    socket.on('test', function() {
-        console.log('Test packet received');
-    });
+    // socket.on('test', function() {
+    //     console.log('Test packet received');
+    // });
 
     socket.on('revive',function(){
         gs.revivePlayer(gs.getPlayerID(socket.id));
@@ -192,6 +177,10 @@ io.on('connection',function(socket){
     socket.on('disconnect',function(){
         console.log('Disconnection with ID '+socket.id);
         if(gs.getPlayer(socket.id)) gs.removePlayer(socket.id);
+    });
+
+    socket.on('transfer', function(data) {
+        gs.receiveTransfer(data,socket);
     });
 });
 

@@ -95,19 +95,25 @@ Client.getName = function(){
     return localStorage.getItem('name');
 };
 
-Client.socket.on('alloc',function(port) {
-    Client.socketFunctions(port);
+Client.socket.on('alloc',function(packet) {
+    Client.socketFunctions(packet);
 });
 
-Client.socketFunctions = function(port) {
+Client.socketFunctions = function(packet) {
     // DEBUG
     // console.log('reallocated', port);
     // console.log('Connecting to port ' + port);
     Client.socket.disconnect();
     console.log('Disconnected from server.');
-    Client.socket = io.connect('http://127.0.0.1:' + port + '/');
+    Client.socket = io.connect('http://127.0.0.1:' + packet.portNumber + '/');
 
     onevent = Client.socket.onevent;
+
+    // if disconnection due to transfer to another server;
+    // forward all information to the new server immediately so it can update
+    if (packet.toTransfer) {
+        Client.socket.emit('transfer', packet);
+    }
 
     // Request initialization only once when disconnecting from the gate
     if (Client.startup) {
@@ -115,16 +121,16 @@ Client.socketFunctions = function(port) {
         Client.startup = false;
     }
 
-    Client.socket.on('test',function(data){
-        console.log('Received init response', data);
-    });
+    // DEBUG
+    // Client.socket.on('test',function(data){
+    //     console.log('Received init response', data);
+    // });
 
     Client.socket.on('pid',function(playerID){ // the 'pid' event is used for the server to tell the client what is the ID of the player
         Client.setLocalData(playerID);
     });
 
     Client.socket.on(Client.initEventName,function(data){ // This event triggers when receiving the initialization packet from the server, to use in Game.initWorld()
-        // console.log('Received init response', data);
         if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.initializationSchema); // if in binary format, decode first
         Client.socket.emit('ponq',data.stamp); // send back a pong stamp to compute latency
         Game.initWorld(data);
@@ -163,8 +169,8 @@ Client.socketFunctions = function(port) {
         Game.playerSays(data.id,data.txt);
     });
 
-    Client.socket.on('alloc', function(port) {
-        Client.socketFunctions(port);
+    Client.socket.on('alloc', function(packet) {
+        Client.socketFunctions(packet);
     });
 };
 
