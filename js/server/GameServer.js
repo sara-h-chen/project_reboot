@@ -36,6 +36,7 @@ var GameServer = {
     socketMap: {}, // map of socket id's to the player id's of the associated players
     IDmap: {} // map of player id's to their mondo db uid's
 };
+
 var serverAlloc;
 
 module.exports.GameServer = GameServer;
@@ -53,21 +54,18 @@ var Item = require('./Item.js').Item;
 GameServer.setup = function(portNumber) {
     var key;
     for (key in servers) {
-        if (servers.hasOwnProperty(key)) {
-            if (servers[key].port == portNumber) {
-                serverAlloc = {
-                    serverNumber: Number(key),
-                    port: portNumber,
-                    serverMin: servers[key].min_y,
-                    serverMax: servers[key].max_y,
-                    topOverlapChannel: servers[key].topChannel,
-                    bottomOverlapChannel: servers[key].bottomChannel
-                };
-                break;
-            }
+        if (servers.hasOwnProperty(key) && key == portNumber) {
+            serverAlloc = {
+                serverNumber: Number(key),
+                port: portNumber,
+                serverMin: servers[key].min_y,
+                serverMax: servers[key].max_y,
+                topOverlapChannel: servers[key].topChannel,
+                bottomOverlapChannel: servers[key].bottomChannel
+            };
+            break;
         }
     }
-    // console.log(serverAlloc);
 };
 
 //A few helper functions
@@ -424,7 +422,9 @@ GameServer.moveAtLocation = function(entity,fromX,fromY,toX,toY){
         entity.setProperty('aoi',AOIto.id);
         var previousAOI = AOIfrom.id;
         AOIfrom.deleteEntity(entity);
-        AOIto.addEntity(false,entity,previousAOI);
+        if(!entity.isRedis) {
+            AOIto.addEntity(false,entity,previousAOI);
+        }
     }
 };
 
@@ -559,18 +559,21 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
     };
 
     // Servers share updates until client disconnects
-    if (path[path.length-1].y > (serverAlloc.serverMax - 25)) {
-        redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
-    } else if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
+    // if (path[path.length-1].y > (serverAlloc.serverMax - 25)) {
+    //     redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
+    // } else if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
+    //     console.log('published to', serverAlloc.topOverlapChannel);
+    //     redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
+    // }
+    if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
         redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
     }
 
     if (path[path.length-1].y > serverAlloc.serverMax) {
-        GameServer.handleOutOfBounds(player,socket,(serverAlloc.port + 1))
+        GameServer.handleOutOfBounds(player,socket,(serverAlloc.port + 1));
+    } else if (path[path.length-1].y < serverAlloc.serverMin) {
+        GameServer.handleOutOfBounds(player,socket,(serverAlloc.port - 1));
     }
-        // } else if (path[path.length-1].y < serverAlloc.serverMin) {
-    //
-    // }
 
     return true;
 };
@@ -580,7 +583,7 @@ GameServer.handleRedis = function(data, player, socketInfo, time) {
     // Path is the array of tiles to travel through
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
-    var deserializedPlayer = deserializePlayer(player);
+    var deserializedPlayer = deserializePlayer(player,true);
     GameServer.redisLoad(socketInfo, deserializedPlayer);
 
     var departureTime = time - socketInfo.latency; // Needed the corrected departure time for the update loop (updateWalk())
@@ -620,7 +623,7 @@ GameServer.receiveTransfer = function(packet,socket) {
     GameServer.addPlayerID(socket.id,deserializedPlayer.id);
     GameServer.IDmap[deserializedPlayer.id] = packet.playerMongoID;
 
-    // Replace entire player with new object
+    // Replace entire player with newly transferred
     GameServer.players[deserializedPlayer.id] = deserializedPlayer;
     GameServer.finalizePlayer(true,socket,deserializedPlayer);
 };

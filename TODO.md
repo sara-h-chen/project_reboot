@@ -20,6 +20,6 @@ We are now working on the static load balancing of the system. Each game server 
 
 -[x] Have the gate server allocate to a server based on the current location of the player, and the defined JSON `servers_alloc.json`.
 
--[ ] Coordinate the socket communications for handover.
+-[x] Coordinate the socket communications for handover.
 
 -[x] Allow gate to create new players.

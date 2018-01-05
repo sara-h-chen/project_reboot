@@ -138,15 +138,14 @@ var getServerAssignment = function(data, callback) {
 };
 
 var serverAssignment = function(location) {
-    var key;
-    for (key in servers) {
+    for (var key in servers) {
         if (servers.hasOwnProperty(key)) {
             if (servers[key].max_y > location.y) {
                 break;
             }
         }
     }
-    return servers[key].port;
+    return key;
 };
 
 var sendAssignment = function(socket, portNumber) {

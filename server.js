@@ -24,6 +24,9 @@
  socket.broadcast.to(socketid).emit('message', 'for your eyes only');
  */
 
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync(__dirname + '/assets/json/servers_alloc.json')).servers;
+
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -32,10 +35,10 @@ var mongo = require('mongodb').MongoClient;
 var quickselect = require('quickselect'); // Used to compute the median for latency
 
 var redis = require('redis');
-var sub = redis.createClient();
+var sub_top = redis.createClient();
+var sub_btm = redis.createClient();
 var pub = redis.createClient();
 
-var mapFormat = require('./js/server/format.js');
 var gs = require('./js/server/GameServer.js').GameServer;
 // For the binary protocol of update packets :
 var CoDec = require('./js/CoDec.js').CoDec;
@@ -109,13 +112,19 @@ var redisCallback = function(channel, packet) {
     var data = received.oriPacket;
     var socketInfo = received.socketInfo;
     var player = received.player;
+    // console.log('-----------', packet);
     gs.handleRedis(data, player, socketInfo, time);
 };
-sub.on('message', redisCallback);
+sub_top.on('message', redisCallback);
+sub_btm.on('message', redisCallback);
 
-// TODO: Refactor to read off the config
-if(server.address().port === 6054) {
-    sub.subscribe('startingBeach');
+// Subscribe to overlap channels
+var servPort = server.address().port.toString();
+if(config[servPort].topChannel.length > 0) {
+    sub_top.subscribe(config[servPort].topChannel);
+}
+if(config[servPort].bottomChannel.length > 0) {
+    sub_btm.subscribe(config[servPort].bottomChannel);
 }
 
 io.on('connection',function(socket){
