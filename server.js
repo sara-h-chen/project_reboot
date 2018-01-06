@@ -112,7 +112,6 @@ var redisCallback = function(channel, packet) {
     var data = received.oriPacket;
     var socketInfo = received.socketInfo;
     var player = received.player;
-    // console.log('-----------', packet);
     gs.handleRedis(data, player, socketInfo, time);
 };
 sub_top.on('message', redisCallback);
@@ -167,7 +166,17 @@ io.on('connection',function(socket){
     });
 
     socket.on('path',function(data){
-        if(!gs.handlePath(pub,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
+        // TODO: Clean up this code
+        var callback = function() {
+            if(!gs.handlePath(pub,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
+        };
+
+        if(!socket.latency) {
+            socket.emit('latency', server.addStamp(data));
+            setTimeout(callback, 500);
+        } else {
+            callback();
+        }
     });
 
     socket.on('chat',function(txt){

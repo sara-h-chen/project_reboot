@@ -26,8 +26,7 @@ AOI.prototype.clear = function(){
 
 AOI.prototype.addEntity = function(isRedis,entity,previous){
     this.entities.push(entity);
-    if(!isRedis) {
-        console.log(isRedis, entity.name);
+    if(!isRedis && (entity.responsibleMachine === GameServer.portNumber)) {
         if(entity.constructor.name == 'Player') GameServer.server.addToRoom(entity.socketID,'AOI'+this.id);
     }
     GameServer.handleAOItransition(isRedis,entity,previous);

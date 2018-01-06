@@ -5,6 +5,7 @@
 var GameServer = require('./GameServer.js').GameServer;
 var MovingEntity = require('./MovingEntity.js').MovingEntity; // Parent class of monsters and players
 var PersonalUpdatePacket = require('./PersonalUpdatePacket.js').PersonalUpdatePacket;
+var Route = require('./Route').Route;
 
 function Player(name){
     MovingEntity.call(this);

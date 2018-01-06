@@ -112,6 +112,7 @@ Client.socketFunctions = function(packet) {
     // if disconnection due to transfer to another server;
     // forward all information to the new server immediately so it can update
     if (packet.toTransfer) {
+        Client.socket.emit('ponq',packet.stamp);
         Client.socket.emit('transfer', packet);
     }
 
@@ -171,6 +172,10 @@ Client.socketFunctions = function(packet) {
 
     Client.socket.on('alloc', function(packet) {
         Client.socketFunctions(packet);
+    });
+
+    Client.socket.on('latency', function(packet) {
+        Client.socket.emit('ponq', packet.stamp);
     });
 };
 

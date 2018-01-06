@@ -34,7 +34,8 @@ var GameServer = {
     nbConnectedChanged: false, // has the number of connected players changed since last update packet or not
     players: {}, // map of all connected players, fetchable by id
     socketMap: {}, // map of socket id's to the player id's of the associated players
-    IDmap: {} // map of player id's to their mondo db uid's
+    IDmap: {}, // map of player id's to their mondo db uid's
+    portNumber: 0
 };
 
 var serverAlloc;
@@ -63,6 +64,7 @@ GameServer.setup = function(portNumber) {
                 topOverlapChannel: servers[key].topChannel,
                 bottomOverlapChannel: servers[key].bottomChannel
             };
+            GameServer.portNumber = portNumber;
             break;
         }
     }
@@ -418,14 +420,12 @@ GameServer.moveAtLocation = function(entity,fromX,fromY,toX,toY){
     map.move(fromX, fromY, toX, toY, entity);
     var AOIfrom = GameServer.AOIfromTiles.getFirst(fromX,fromY);
     var AOIto = GameServer.AOIfromTiles.getFirst(entity.x,entity.y);
-    if(AOIfrom.id != AOIto.id){
-        entity.setProperty('aoi',AOIto.id);
+    if(AOIfrom.id != AOIto.id) {
+        entity.setProperty('aoi', AOIto.id);
         var previousAOI = AOIfrom.id;
         AOIfrom.deleteEntity(entity);
-        if(!entity.isRedis) {
-            AOIto.addEntity(false,entity,previousAOI);
-        }
     }
+    AOIto.addEntity(false, entity, previousAOI);
 };
 
 GameServer.removeFromLocation = function(entity){
@@ -551,28 +551,33 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         latency: socket.latency,
         id: socket.id
     };
+
+    player['responsibleMachine'] = serverAlloc.port;
     var finalPacket = {
         loggedTime: time,
         oriPacket: originalPacket,
         socketInfo: socketInfo,
         player: player
     };
+    // console.log('------------------', player.route);
 
     // Servers share updates until client disconnects
-    // if (path[path.length-1].y > (serverAlloc.serverMax - 25)) {
-    //     redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
-    // } else if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
-    //     console.log('published to', serverAlloc.topOverlapChannel);
-    //     redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
-    // }
-    if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
+    if (path[path.length-1].y > (serverAlloc.serverMax - 25)) {
+        redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
+    } else if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
         redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
     }
 
+    var pathInfo = {
+        path: path,
+        depTime: departureTime,
+        action: action,
+        orientation: orientation
+    };
     if (path[path.length-1].y > serverAlloc.serverMax) {
-        GameServer.handleOutOfBounds(player,socket,(serverAlloc.port + 1));
+        GameServer.handleOutOfBounds(pathInfo,socketInfo,player,socket,(serverAlloc.port + 1));
     } else if (path[path.length-1].y < serverAlloc.serverMin) {
-        GameServer.handleOutOfBounds(player,socket,(serverAlloc.port - 1));
+        GameServer.handleOutOfBounds(pathInfo,socketInfo,player,socket,(serverAlloc.port - 1));
     }
 
     return true;
@@ -596,14 +601,16 @@ GameServer.handleRedis = function(data, player, socketInfo, time) {
 /*
  * Outgoing transfer player
  */
-GameServer.handleOutOfBounds = function(player,socket,portNumber) {
+GameServer.handleOutOfBounds = function(pathInfo,socketInfo,player,socket,portNumber) {
     var transferPacket = {
         portNumber: portNumber,
         toTransfer: true,
         player: player,
         playerMongoID: player.getMongoID(),
-        oldSocket: socket.id
+        oldSocket: socketInfo,
+        pathInfo: pathInfo
     };
+    GameServer.addStamp(transferPacket);
 
     socket.emit('alloc', transferPacket);
     GameServer.removePlayer(socket.id);
@@ -614,6 +621,10 @@ GameServer.handleOutOfBounds = function(player,socket,portNumber) {
  */
 GameServer.receiveTransfer = function(packet,socket) {
     var deserializedPlayer = deserializePlayer(packet.player,false);
+
+    var pathData = packet.pathInfo;
+    deserializedPlayer.setRoute(pathData.path,pathData.depTime,packet.oldSocket.latency,pathData.action,pathData.orientation);
+
     // DEBUG
     // console.log(deserializedPlayer);
     // console.log('------------>>', deserializedPlayer.updatePacket);
@@ -900,4 +911,13 @@ Array.prototype.diff = function(a) { // returns the elements in the array that a
     return this.filter(function(i) {
         return a.indexOf(i) < 0;
     });
+};
+
+GameServer.addStamp = function(packet){
+    packet.stamp = GameServer.getShortStamp();
+    return packet;
+};
+
+GameServer.getShortStamp = function(){
+    return parseInt(Date.now().toString().substr(-9));
 };
