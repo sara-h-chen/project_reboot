@@ -218,7 +218,7 @@ io.on('connection',function(socket){
             benchmark['time'] = new Date().getTime() / 1000;
         });
         // DEBUG
-        console.log(benchmark);
+        // console.log(benchmark);
         pub.publish('master', JSON.stringify(benchmark));
     }
 
