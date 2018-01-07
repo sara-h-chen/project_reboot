@@ -430,7 +430,7 @@ Game.initWorld = function(data){ // Initialize the game world based on the serve
     Client.emptyQueue(); // Process the queue of packets from the server that had to wait while the client was initializing
     Game.groundMapLayers.setAll('visible',true);
     Game.highMapLayers.setAll('visible',true);
-    //Game.scenery.setAll('visible',true);
+    // Game.scenery.setAll('visible',true);
     // Destroy loading screen
     Game.loadingShade.destroy();
     Game.loadingText.destroy();

@@ -33,6 +33,7 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var quickselect = require('quickselect'); // Used to compute the median for latency
+var pusage = require('pidusage');
 
 var redis = require('redis');
 var sub_top = redis.createClient();
@@ -43,6 +44,9 @@ var gs = require('./js/server/GameServer.js').GameServer;
 // For the binary protocol of update packets :
 var CoDec = require('./js/CoDec.js').CoDec;
 var Encoder = require('./js/server/Encoder.js').Encoder;
+
+// For pushing status to master
+var benchmark = {};
 
 server.enableBinary = false;
 gs.server = server;
@@ -140,6 +144,8 @@ io.on('connection',function(socket){
         socket.pings.push(delta); // socket.pings is the list of the 20 last latencies
         if(socket.pings.length > 20) socket.pings.shift(); // keep the size down to 20
         socket.latency = server.quickMedian(socket.pings.slice(0)); // quickMedian used the quickselect algorithm to compute the median of a list of values
+        benchmark['latency'] = socket.latency;
+        processUsage();
     });
 
     socket.on('init-world', function(data) {
@@ -200,7 +206,28 @@ io.on('connection',function(socket){
     socket.on('transfer', function(data) {
         gs.receiveTransfer(data,socket);
     });
+
+    /*
+     * Benchmark whenever a user is connected
+     */
+    function processUsage() {
+        pusage.stat(process.pid, function(err, stat) {
+            benchmark['cpu'] = stat.cpu;
+            benchmark['memory'] = stat.memory; // these are bytes
+        });
+        // DEBUG
+        // TODO: Push this out to Redis
+        console.log(benchmark);
+    }
+
+    var ping = function() {
+        var data = {data: "empty"};
+        server.addStamp(data);
+        socket.emit('latency',data);
+    };
+    setInterval(ping, 5000);
 });
+
 
 server.setUpdateLoop = function(){
     setInterval(gs.updatePlayers,server.clientUpdateRate);
