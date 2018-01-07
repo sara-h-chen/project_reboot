@@ -559,6 +559,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         socketInfo: socketInfo,
         player: player
     };
+    // DEBUG
     // console.log('------------------', player.route);
 
     // Servers share updates until client disconnects

@@ -212,14 +212,16 @@ io.on('connection',function(socket){
      */
     function processUsage() {
         pusage.stat(process.pid, function(err, stat) {
+            benchmark['machine'] = server.address().port;
             benchmark['cpu'] = stat.cpu;
             benchmark['memory'] = stat.memory; // these are bytes
         });
         // DEBUG
-        // TODO: Push this out to Redis
-        console.log(benchmark);
+        // console.log(benchmark);
+        pub.publish('master', JSON.stringify(benchmark));
     }
 
+    // Ping to measure latency every 5 seconds
     var ping = function() {
         var data = {data: "empty"};
         server.addStamp(data);
