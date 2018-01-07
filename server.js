@@ -215,14 +215,17 @@ io.on('connection',function(socket){
             benchmark['machine'] = server.address().port;
             benchmark['cpu'] = stat.cpu;
             benchmark['memory'] = stat.memory; // these are bytes
+            benchmark['time'] = new Date().getTime() / 1000;
         });
         // DEBUG
-        // console.log(benchmark);
+        console.log(benchmark);
         pub.publish('master', JSON.stringify(benchmark));
     }
 
     // Ping to measure latency every 5 seconds
     var ping = function() {
+        // DEBUG
+        // console.log('timestamp', new Date().getTime() / 1000);
         var data = {data: "empty"};
         server.addStamp(data);
         socket.emit('latency',data);
