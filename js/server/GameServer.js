@@ -563,7 +563,10 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
     // console.log('------------------', player.route);
 
     // Servers share updates until client disconnects
+    // TODO: have only the responsible server publish until handover
+    // isCyclic(finalPacket);
     if (path[path.length-1].y > (serverAlloc.serverMax - 25)) {
+        console.log('-------------------------', finalPacket);
         redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
     } else if (path[path.length-1].y < (serverAlloc.serverMin + 25)) {
         redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
@@ -922,3 +925,25 @@ GameServer.addStamp = function(packet){
 GameServer.getShortStamp = function(){
     return parseInt(Date.now().toString().substr(-9));
 };
+
+// function isCyclic (obj) {
+//     var seenObjects = [];
+//
+//     function detect (obj) {
+//         if (obj && typeof obj === 'object') {
+//             if (seenObjects.indexOf(obj) !== -1) {
+//                 return true;
+//             }
+//             seenObjects.push(obj);
+//             for (var key in obj) {
+//                 if (obj.hasOwnProperty(key) && detect(obj[key])) {
+//                     console.log(obj, 'cycle at ' + key);
+//                     return true;
+//                 }
+//             }
+//         }
+//         return false;
+//     }
+//
+//     return detect(obj);
+// }

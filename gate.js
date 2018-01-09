@@ -124,6 +124,8 @@ io.on('connection',function(socket){
 
 var getServerAssignment = function(data, callback) {
     server.db.collection('players').findOne({_id: new ObjectId(data.id)}, function(err, doc) {
+        // TODO: Rewrite player deserializer
+        console.log('----------------player ', doc);
         if (err) throw err;
         if (!doc) {
             callback(startingServer);

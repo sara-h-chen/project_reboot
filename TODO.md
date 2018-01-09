@@ -11,9 +11,9 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] Improve AI behavior.
 
 #### System Monitoring
-- [ ] Establish a Master server that pulls workload information periodically from each server.
+- [x] Establish a Master server that receives workload information pushed periodically from each server.
 
-- [ ] Create web interface that displays this workload information, and plots graphically.
+- [x] Create web interface that displays this workload information, and plots graphically.
 
 #### Static Load Balancing
 - [x] Set up gate server `gate.js` on port `8080`.
@@ -23,6 +23,9 @@ We are now working on the static load balancing of the system. Each game server 
 - [x] Coordinate the socket communications for handover.
 
 - [x] Allow gate to create new players.
+
+#### Dynamic Load Balancing
+- [ ] Monitor workload on the master server using a Fibonacci heap. Once you hit a threshold on any of the servers then you allocate __only__ to adjacent servers to reduce the overhead of transferring packets between the servers should the player density fall.
 
 ### Notes for Paper
 - [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
@@ -39,5 +42,4 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [ ] Overlapping region where two servers share information about the player's behavior, so they both keep a copy of the player.
 
-
-
+- [ ] Set interval; the execution of code affects the behavior of the app, due to differences in timing right down to the millisecond. E.g. the switch statement and the plotting of the graph on the master server -- an interval mismatch will cause inaccuracy, i.e. any slower and there will be the wrong number of connections, but any faster and there will be a gap in the data.

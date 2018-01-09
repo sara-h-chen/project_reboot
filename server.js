@@ -214,9 +214,7 @@ io.on('connection',function(socket){
         pusage.stat(process.pid, function(err, stat) {
             benchmark['machine'] = server.address().port;
             benchmark['cpu'] = stat.cpu;
-            benchmark['memory'] = stat.memory; // these are bytes
-            benchmark['time'] = new Date().getTime() / 1000;
-        });
+            });
         // DEBUG
         // console.log(benchmark);
         pub.publish('master', JSON.stringify(benchmark));
