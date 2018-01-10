@@ -43,3 +43,5 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] Overlapping region where two servers share information about the player's behavior, so they both keep a copy of the player.
 
 - [ ] Set interval; the execution of code affects the behavior of the app, due to differences in timing right down to the millisecond. E.g. the switch statement and the plotting of the graph on the master server -- an interval mismatch will cause inaccuracy, i.e. any slower and there will be the wrong number of connections, but any faster and there will be a gap in the data.
+
+- [ ] Large lag during transfer if not loaded in advance

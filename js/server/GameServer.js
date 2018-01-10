@@ -600,15 +600,9 @@ GameServer.handleRedis = function(data, player, socketInfo, time) {
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
     var departureTime = time - socketInfo.latency; // Needed the corrected departure time for the update loop (updateWalk())
-
-    var loadedPlayer = GameServer.getPlayer(socketInfo.id);
-    if (loadedPlayer) {
-        loadedPlayer.setRoute(data.path,departureTime,socketInfo.latency,data.action,data.or);
-    } else {
-        var deserializedPlayer = deserializePlayer(socketInfo.id, player, true);
-        GameServer.redisLoad(socketInfo,deserializedPlayer);
-        deserializedPlayer.setRoute(data.path,departureTime,socketInfo.latency,data.action,data.or);
-    }
+    var deserializedPlayer = deserializePlayer(socketInfo.id, player, true);
+    GameServer.redisLoad(socketInfo,deserializedPlayer);
+    deserializedPlayer.setRoute(data.path,departureTime,socketInfo.latency,data.action,data.or);
 
     // DEBUG
     // console.log('============= moved ===============');
