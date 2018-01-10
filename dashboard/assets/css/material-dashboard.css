@@ -5649,6 +5649,7 @@ footer .btn {
     stroke-width: 60px;
 }
 
+/* First line in series */
 .ct-series-a .ct-point,
 .ct-series-a .ct-line,
 .ct-series-a .ct-bar,
@@ -5661,6 +5662,7 @@ footer .btn {
     fill: #00bcd4;
 }
 
+/* Second line in series */
 .ct-series-b .ct-point,
 .ct-series-b .ct-line,
 .ct-series-b .ct-bar,

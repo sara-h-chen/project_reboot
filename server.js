@@ -35,6 +35,7 @@ var mongo = require('mongodb').MongoClient;
 var quickselect = require('quickselect'); // Used to compute the median for latency
 var pusage = require('pidusage');
 
+// Listen for messages on Redis
 var redis = require('redis');
 var sub_top = redis.createClient();
 var sub_btm = redis.createClient();
@@ -172,11 +173,11 @@ io.on('connection',function(socket){
     });
 
     socket.on('path',function(data){
-        // TODO: Clean up this code
         var callback = function() {
             if(!gs.handlePath(pub,data,data.path,data.action,data.or,socket)) socket.emit('reset',gs.getCurrentPosition(socket.id));
         };
 
+        // Ensure that latency is calculated and that you give a 500ms headstart to the server to before setting path for player
         if(!socket.latency) {
             socket.emit('latency', server.addStamp(data));
             setTimeout(callback, 500);
@@ -207,9 +208,7 @@ io.on('connection',function(socket){
         gs.receiveTransfer(data,socket);
     });
 
-    /*
-     * Benchmark whenever a user is connected
-     */
+    // Benchmark whenever a user is connected
     function processUsage() {
         pusage.stat(process.pid, function(err, stat) {
             benchmark['machine'] = server.address().port;

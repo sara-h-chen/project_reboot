@@ -22,7 +22,7 @@
 
  // sending to individual socketid, but not sender
  socket.broadcast.to(socketid).emit('message', 'for your eyes only');
- */
+*/
 
 var express = require('express');
 var app = express();
@@ -124,7 +124,7 @@ io.on('connection',function(socket){
 
 var getServerAssignment = function(data, callback) {
     server.db.collection('players').findOne({_id: new ObjectId(data.id)}, function(err, doc) {
-        // TODO: Rewrite player deserializer
+        // DEBUG
         // console.log('---------------- player ', doc);
         if (err) throw err;
         if (!doc) {

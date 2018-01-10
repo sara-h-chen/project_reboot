@@ -70,7 +70,7 @@ GameServer.setup = function(portNumber) {
     }
 };
 
-//A few helper functions
+// A few helper functions
 GameServer.addPlayerID = function(socketID,playerID){ // map a socket id to a player id
     GameServer.socketMap[socketID] = playerID;
 };
@@ -321,11 +321,12 @@ GameServer.loadPlayer = function(socket,id){
     });
 };
 
-// Redis-specific function that updates players within overlapping region
+// Redis-specific function that updates players within overlapping region based on shared information, and not from the database
 GameServer.redisLoad = function(socket,player) {
     GameServer.finalizePlayer(true,socket,player);
 };
 
+// If not called by Redis, then send initialization packet
 GameServer.finalizePlayer = function(isRedis,socket,player){
     GameServer.embedPlayer(isRedis,player);
     if(!isRedis) {
@@ -333,7 +334,6 @@ GameServer.finalizePlayer = function(isRedis,socket,player){
         GameServer.server.sendInitializationPacket(socket,GameServer.createInitializationPacket(player.id));
     }
 };
-
 
 GameServer.createInitializationPacket = function(playerID){
     // Create the packet that the client will receive from the server in order to initialize the game
@@ -495,7 +495,8 @@ GameServer.convertPath = function(p){
     return path;
 };
 
-GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation,socket){ // Processes a path sent by a client
+// Processes a path sent by a client
+GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation,socket){
     // Path is the array of tiles to travel through
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
@@ -544,9 +545,8 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
 
     if(player.inFight && action && action.action != 3) player.endFight();
 
-    /*
-     * Prepare information to send to other server
-     */
+    // Prepare information to send to share with next servers
+    // Set responsible machine attribute so that the server would know whether to send updates periodically
     player['responsibleMachine'] = serverAlloc.port;
     var socketInfo = {
         latency: socket.latency,
@@ -571,14 +571,16 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
     // DEBUG
     // console.log('------------------', player.id);
 
-    // Servers share updates until client disconnects
+    // Responsible servers share updates until client disconnects
     if (path[path.length-1].y > (serverAlloc.serverMax - 25) && (player.responsibleMachine === GameServer.portNumber)) {
+        // DEBUG
         // console.log('-------------------------', finalPacket);
         redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
     } else if (path[path.length-1].y < (serverAlloc.serverMin + 25) && (player.responsibleMachine === GameServer.portNumber)) {
         redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
     }
 
+    // Prepare information to handover to next server
     var pathInfo = {
         path: path,
         depTime: departureTime,
@@ -594,8 +596,8 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
     return true;
 };
 
+// Processes a player and its path received through Redis
 GameServer.handleRedis = function(data, player, socketInfo, time) {
-    // Processes a path received on the Redis MQ
     // Path is the array of tiles to travel through
     // Action is a small object indicating what to do at the end of the path (pick up loot, attack monster ..)
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
@@ -782,7 +784,7 @@ GameServer.spawnHiddenChest = function(properties){ // If all the monsters in a 
 };
 
 // ============================
-// Upate code for the game objects
+// Update code for the game objects
 
 GameServer.update = function(){ // called every 1/12 of sec
     Object.keys(GameServer.players).forEach(function(key) {
@@ -802,6 +804,7 @@ GameServer.regenerate = function(){
     });
 };
 
+// Only updates for players the server is responsible for
 GameServer.updatePlayers = function(){ //Function responsible for setting up and sending update packets to clients
     Object.keys(GameServer.players).forEach(function(key) {
         var player = GameServer.players[key];
@@ -919,6 +922,7 @@ Array.prototype.diff = function(a) { // returns the elements in the array that a
     });
 };
 
+// Functions to add time stamp; for calculating latency
 GameServer.addStamp = function(packet){
     packet.stamp = GameServer.getShortStamp();
     return packet;
@@ -927,25 +931,3 @@ GameServer.addStamp = function(packet){
 GameServer.getShortStamp = function(){
     return parseInt(Date.now().toString().substr(-9));
 };
-
-// function isCyclic (obj) {
-//     var seenObjects = [];
-//
-//     function detect (obj) {
-//         if (obj && typeof obj === 'object') {
-//             if (seenObjects.indexOf(obj) !== -1) {
-//                 return true;
-//             }
-//             seenObjects.push(obj);
-//             for (var key in obj) {
-//                 if (obj.hasOwnProperty(key) && detect(obj[key])) {
-//                     console.log(obj, 'cycle at ' + key);
-//                     return true;
-//                 }
-//             }
-//         }
-//         return false;
-//     }
-//
-//     return detect(obj);
-// }

@@ -18,9 +18,10 @@ Client.socket = io.connect();
 var onevent = Client.socket.onevent;
 
 Client.socket.onevent = function (packet) {
-    // if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc'){
+    if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc') {
+    // DEBUG
     // console.log(packet);
-    if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc' && packet.data[0] != 'test'){
+    // if(!Game.playerIsInitialized && packet.data[0] != Client.initEventName && packet.data[0] != 'dbError' && packet.data[0] != 'alloc' && packet.data[0] != 'test'){
         Client.eventsQueue.push(packet);
     }else{
         onevent.call(this, packet);    // original call
@@ -36,7 +37,6 @@ Client.emptyQueue = function(){ // Process the events that have been queued duri
 Client.requestData = function(){ // request the data to be used for initWorld()
     Client.socket.emit('init-world',Client.getInitRequest());
 };
-
 
 Client.getInitRequest = function(){ // Returns the data object to send to request the initialization data
     // In case of a new player, set new to true and send the name of the player
@@ -95,6 +95,7 @@ Client.getName = function(){
     return localStorage.getItem('name');
 };
 
+// Every time client receives alloc, it reconnects to another server
 Client.socket.on('alloc',function(packet) {
     Client.socketFunctions(packet);
 });
@@ -138,7 +139,7 @@ Client.socketFunctions = function(packet) {
         Game.updateNbConnected(data.nbconnected);
     });
 
-    Client.socket.on('update',function(data){ // This event triggers uppon receiving an update packet (data)
+    Client.socket.on('update',function(data){ // This event triggers upon receiving an update packet (data)
         if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.finalUpdateSchema); // if in binary format, decode first
         Client.socket.emit('ponq',data.stamp);  // send back a pong stamp to compute latency
         if(data.nbconnected !== undefined) Game.updateNbConnected(data.nbconnected);
