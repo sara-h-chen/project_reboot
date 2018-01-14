@@ -110,15 +110,9 @@ app.get('/load', function(req,res) {
         // Clear variables after responding to client AJAX call
         infoStack.splice(0, infoStack.length);
         sendStack.splice(0, sendStack.length);
-        serversTotalCpu.map(function() {
-            return 0.0;
-        });
-        serversTotalLat.map(function() {
-            return 0.0;
-        });
-        conn.map(function() {
-            return 0.0;
-        });
+        serversTotalCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
+        serversTotalLat = [0.0, 0.0, 0.0, 0.0, 0.0];
+        conn = [0, 0, 0, 0, 0];
         masterCpu = 0.0;
     };
     processUsage(callback);
