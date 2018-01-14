@@ -150,15 +150,16 @@ function processUsage(callback) {
 /*
  * Begin dynamic load balancing with Fib Heap
  */
-// function evaluateWorkload(avgCpu0, avgCpu1, avgCpu2, avgCpu3, avgCpu4) {
-//     for (var server=0; server < serversActive.length; i++) {
-//         // If server has just become active
-//         if(serversActive[server] && serversAvgCpu[server] === 0.0) {
-//
-//             fibHeap.insert()
-//         // If server has been active and has previous workload
-//         } else if(serversActive[server]) {
-//
-//         }
-//     }
-// }
+// TODO: Complete the dynamic load balancing
+function evaluateWorkload(averageCpus, averageLatencies) {
+    for (var server=0; server < serversActive.length; i++) {
+        // If server has just become active, insert
+        if(serversActive[server] && serversAvgCpu[server] === 0.0) {
+            fibHeap.insert(server, averageCpus[server]);
+            serversAvgCpu[server] = averageCpus[server];
+        // If server has been active and has previous workload
+        } else if(serversActive[server]) {
+            // if
+        }
+    }
+}

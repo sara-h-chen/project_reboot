@@ -59,3 +59,5 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] Redis is used to cache the data temporarily as it transfers between servers, as a centralized datastore. The system does little to offer anything other than Persistence, according to CAP's Theorem, because it either rolls back or completes the transaction.
 
 - [ ] Fibonacci Analysis: Put first thing that `isActive` into heap. Use individual variables to then store the current workload of each server. If the workload increases then delete the node and re-insert the new workload O(logn). If decreases then decrease-key O(1). [Reference.](http://mathjs.org/docs/reference/classes/fibonacciheap.html)
+
+- [ ] Latency and CPU/thread usage differs, depending on hardware. On worse hardware, latency is higher and CPU usage is higher (tested on Dell Inspiron 14 3000 2.2GHz i5, 4GB RAM, 500GB HDD and MacBook Pro 2.3GHz Kaby Lake i5 dual-core processor, 8GB RAM, 256GB SSD storage).
