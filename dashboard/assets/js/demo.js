@@ -1,10 +1,5 @@
 type = ['', 'info', 'success', 'warning', 'danger'];
 
-/*
- * Track if servers are active
- */
-var serversActive = [false, false, false, false, false];
-
 server0pid = {
     labels: [0],
     series: [
@@ -48,7 +43,6 @@ server4pid = {
 masterPid = {
     labels: [0],
     series: [
-        [0],
         [0]
     ]
 };
@@ -68,139 +62,80 @@ demo = {
      */
     updateCharts: function(res) {
         var infoStack = JSON.parse(res);
-
-        /*
-         * For calculating the averages
-         */
-        var server0ttcpu = 0.0,
-            server1ttcpu = 0.0,
-            server2ttcpu = 0.0,
-            server3ttcpu = 0.0,
-            server4ttcpu = 0.0;
-
-        var server0ttlat = 0.0,
-            server1ttlat = 0.0,
-            server2ttlat = 0.0,
-            server3ttlat = 0.0,
-            server4ttlat = 0.0;
-
-        var conn0 = 0,
-            conn1 = 0,
-            conn2 = 0,
-            conn3 = 0,
-            conn4 = 0;
-
-        var mastertime = "";
-        var mastercpu = 0.0;
-
-        for (var i = 0; i < infoStack.length; i++) {
-            if (!infoStack[i].machine) {
-                continue;
-            }
-            switch (infoStack[i].machine) {
-                case 6050:
-                    serversActive[0] = true;
-                    server0ttcpu += infoStack[i].cpu;
-                    server0ttlat += infoStack[i].latency;
-                    conn0 += 1;
-                    break;
-                case 6051:
-                    serversActive[1] = true;
-                    server1ttcpu += infoStack[i].cpu;
-                    server1ttlat += infoStack[i].latency;
-                    conn1 += 1;
-                    break;
-                case 6052:
-                    serversActive[2] = true;
-                    server2ttcpu += infoStack[i].cpu;
-                    server2ttlat += infoStack[i].latency;
-                    conn2 += 1;
-                    break;
-                case 6053:
-                    serversActive[3] = true;
-                    server3ttcpu += infoStack[i].cpu;
-                    server3ttlat += infoStack[i].latency;
-                    conn3 += 1;
-                    break;
-                case 6054:
-                    serversActive[4] = true;
-                    server4ttcpu += infoStack[i].cpu;
-                    server4ttlat += infoStack[i].latency;
-                    conn4 += 1;
-                    break;
-                case 8000:
-                    mastercpu = infoStack[i].cpu;
-                    mastertime = infoStack[i].time.toString();
-                    break;
-            }
+        if(jQuery.isEmptyObject(infoStack[5])) {
+            return;
         }
 
         if(server0pid.series[0].length > 8) {
             server0pid.labels.shift();
             server0pid.series[0].shift();
             server0pid.series[1].shift();
-        } else if (serversActive[0]) {
-            server0pid.labels.push(conn0);
-            server0pid.series[0].push((conn0 > 0) ? (server0ttcpu / conn0) : 0);
-            server0pid.series[1].push((conn0 > 0) ? (server0ttlat / conn0) : 0);
+        }
+        if (infoStack[0].isActive) {
+            server0pid.labels.push(infoStack[0].conn);
+            server0pid.series[0].push(infoStack[0].cpu);
+            server0pid.series[1].push(infoStack[0].lat);
         }
 
         if(server1pid.series[0].length > 8) {
             server1pid.labels.shift();
             server1pid.series[0].shift();
             server1pid.series[1].shift();
-        } else if (serversActive[1]) {
-            server1pid.labels.push(conn1);
-            server1pid.series[0].push((conn1 > 0) ? (server1ttcpu / conn1) : 0);
-            server1pid.series[1].push((conn1 > 0) ? (server1ttlat / conn1) : 0);
+        }
+        if (infoStack[1].isActive) {
+            server1pid.labels.push(infoStack[1].conn);
+            server1pid.series[0].push(infoStack[1].cpu);
+            server1pid.series[1].push(infoStack[1].lat);
         }
 
         if(server2pid.series[0].length > 8) {
             server2pid.labels.shift();
             server2pid.series[0].shift();
             server2pid.series[1].shift();
-        } else if (serversActive[2]) {
-            server2pid.labels.push(conn2);
-            server2pid.series[0].push((conn2 > 0) ? (server2ttcpu / conn2) : 0);
-            server2pid.series[1].push((conn2 > 0) ? (server2ttlat / conn2) : 0);
-
+        }
+        if (infoStack[2].isActive) {
+            server2pid.labels.push(infoStack[2].conn);
+            server2pid.series[0].push(infoStack[2].cpu);
+            server2pid.series[1].push(infoStack[2].lat);
         }
 
         if(server3pid.series[0].length > 8) {
             server3pid.labels.shift();
             server3pid.series[0].shift();
             server3pid.series[1].shift();
-
-        } else if (serversActive[3]) {
-            server3pid.labels.push(conn3);
-            server3pid.series[0].push((conn3 > 0) ? (server3ttcpu / conn3) : 0);
-            server3pid.series[1].push((conn3 > 0) ? (server3ttlat / conn3) : 0);
+        }
+        if (infoStack[3].isActive) {
+            server3pid.labels.push(infoStack[3].conn);
+            server3pid.series[0].push(infoStack[3].cpu);
+            server3pid.series[1].push(infoStack[3].lat);
         }
 
         if(server4pid.series[0].length > 8) {
             server4pid.labels.shift();
             server4pid.series[0].shift();
             server4pid.series[1].shift();
-        } else if (serversActive[4]) {
-            server4pid.labels.push(conn4);
-            server4pid.series[0].push((conn4 > 0) ? (server4ttcpu / conn4) : 0);
-            server4pid.series[1].push((conn4 > 0) ? (server4ttlat / conn4) : 0);
+        }
+        if (infoStack[4].isActive) {
+            server4pid.labels.push(infoStack[4].conn);
+            server4pid.series[0].push(infoStack[4].cpu);
+            server4pid.series[1].push(infoStack[4].lat);
         }
 
         if(masterPid.series[0].length > 8) {
             masterPid.labels.shift();
             masterPid.series[0].shift();
         }
-        var slicedTime = mastertime.slice(-6,-2);
+        var slicedTime = infoStack[5].time.toString().slice(-6,-2);
         masterPid.labels.push(slicedTime);
-        masterPid.series[0].push(mastercpu);
+        masterPid.series[0].push(infoStack[5].cpu);
 
         var activeServerCount = 0;
-        for (var count = 0; count < serversActive.length; count++) {
-            if(serversActive[count]) {
+        for (var count = 0; count < infoStack.length; count++) {
+            if(infoStack[count].isActive) {
                 activeServerCount += 1;
             }
         }
+
         var serverCount = '<h3 class="title" id="numberOfActives">' + activeServerCount + '/5</h3>';
         $('#numberOfActives').replaceWith(serverCount);
 
