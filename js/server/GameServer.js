@@ -587,6 +587,8 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         action: action,
         orientation: orientation
     };
+    // Share within overlapping regions
+    // TODO: Have a boolean variable to OR with this so you can transfer if a server is at its limit
     if (path[path.length-1].y > serverAlloc.serverMax) {
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port + 1));
     } else if (path[path.length-1].y < serverAlloc.serverMin) {
