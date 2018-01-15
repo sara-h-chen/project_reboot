@@ -11,7 +11,10 @@ var redis = require('redis');
 var sub = redis.createClient();
 
 // Manage command line arguments
-var myArgs = require('optimist').argv;
+var myArgs = require('optimist')
+    .usage('Usage: node master.js -d[c/l]')
+    .default('c', true)
+    .argv;
 var FibonacciHeap = require('@tyriar/fibonacci-heap').FibonacciHeap;
 
 // Manage incoming
@@ -21,10 +24,10 @@ var sendStack = [];
 var benchmark = {};
 
 // For the dynamic load balancing
-var setDynamic = false;
+var chosenParameter;
 var fibHeap = new FibonacciHeap();
 // For the Fibonacci Heap to maintain the server with minimum workload
-var serversLastAvgCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
+var serversLastAvg = [0.0, 0.0, 0.0, 0.0, 0.0];
 var nodePointers = [null, null, null, null, null];
 // Checks if the increase in CPU usage persists for at least 2 ticks
 var increaseIsPersistent = [false, false, false, false, false];
@@ -107,7 +110,11 @@ app.get('/load', function(req,res) {
 
     // TODO: Insert function to evaluate workload on all nodes here
     // TODO: Pre-empt transfer is exceeds threshold
-    maintainMinWorkloadServer(avgCpu, avgLat);
+
+    if(myArgs.d) {
+        // Maintain Fibonacci Heap if dynamically load balancing
+        maintainMinWorkloadServer(avgCpu, avgLat);
+    }
 
     var callback = function() {
         sendStack.push(benchmark);
@@ -126,9 +133,9 @@ app.get('/load', function(req,res) {
 
 // -d flag specifies if dynamic load balancing is active;
 // defaults to static load balancing
-server.listen(myArgs.d || process.env.PORT || 8000, function() {
+server.listen(process.env.PORT || 8000, function() {
     if(myArgs.d) {
-        setDynamic = true;
+        console.log('The system will now run with dynamic load balancing. WARNING: Ensure you have either [c/l] as command line arguments to load balance by CPU USAGE or LATENCY.');
     }
     console.log('Master listening on ' + server.address().port);
 });
@@ -153,39 +160,42 @@ function processUsage(callback) {
     callback();
 }
 
-
-// TODO: Implement both workload and latency prioritization using a command line switch
 /*
  * Use the Fibonacci Heap to maintain server with min workload
  */
 function maintainMinWorkloadServer(averageCpus, averageLatencies) {
+    if (myArgs.c) {
+        chosenParameter = averageCpus;
+    } else if (myArgs.l) {
+        chosenParameter = averageLatencies;
+    }
     for (var server=0; server < serversActive.length; server++) {
         // If server has just become active, insert
         if(serversActive[server] && !nodePointers[server]) {
             // Keep track of the inserted node for each server
             // K: Average workload, V: server
-            nodePointers[server] = fibHeap.insert(averageCpus[server], server);
+            nodePointers[server] = fibHeap.insert(chosenParameter[server], server);
         // If server has been active and has previous workload
         } else if(serversActive[server]) {
-            if(averageCpus[server] <= serversLastAvgCpu[server]) {
+            if(chosenParameter[server] <= serversLastAvg[server]) {
                 // Breaks persistence of increase since it hasn't
                 increaseIsPersistent[server] = false;
 
-                // In case latency packets come in empty for a single tick
-                if (averageCpus[server] == 0 && !zeroIsPersistent[server]) {
+                // In case packets come in empty for a single tick
+                if (chosenParameter[server] == 0 && !zeroIsPersistent[server]) {
                     zeroIsPersistent[server] = true;
-                } else if (averageCpus[server] == 0 && zeroIsPersistent[server]) {
-                    fibHeap.decreaseKey(nodePointers[server], averageCpus[server]);
+                } else if (chosenParameter[server] == 0 && zeroIsPersistent[server]) {
+                    fibHeap.decreaseKey(nodePointers[server], chosenParameter[server]);
                     zeroIsPersistent[server] = false;
-                // Average CPU is not 0
-                } else if (averageCpus[server] < serversLastAvgCpu[server]) {
-                    fibHeap.decreaseKey(nodePointers[server], averageCpus[server]);
+                // Average CPU/lat is not 0
+                } else if (chosenParameter[server] < serversLastAvg[server]) {
+                    fibHeap.decreaseKey(nodePointers[server], chosenParameter[server]);
                 }
 
-            } else if(averageCpus[server] > serversLastAvgCpu[server]) {
+            } else if(chosenParameter[server] > serversLastAvg[server]) {
                 if(increaseIsPersistent[server]) {
                     fibHeap.delete(nodePointers[server]);
-                    nodePointers[server] = fibHeap.insert(averageCpus[server], server);
+                    nodePointers[server] = fibHeap.insert(chosenParameter[server], server);
                     increaseIsPersistent[server] = false;
                 } else {
                     // Ignore the temporary increase; do not update the stored value
@@ -194,7 +204,7 @@ function maintainMinWorkloadServer(averageCpus, averageLatencies) {
                 }
             }
         }
-        serversLastAvgCpu[server] = averageCpus[server];
+        serversLastAvg[server] = chosenParameter[server];
     }
     // DEBUG
     // console.log('average cpus this iteration', averageCpus);
