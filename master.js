@@ -13,7 +13,6 @@ var sub = redis.createClient();
 // Manage command line arguments
 var myArgs = require('optimist')
     .usage('Usage: node master.js -d[c/l]')
-    .default('c', true)
     .argv;
 var FibonacciHeap = require('@tyriar/fibonacci-heap').FibonacciHeap;
 
@@ -112,7 +111,7 @@ app.get('/load', function(req,res) {
     // TODO: Pre-empt transfer is exceeds threshold
 
     if(myArgs.d) {
-        // Maintain Fibonacci Heap if dynamically load balancing
+        // Maintain Fibonacci Heap only if dynamically load balancing
         maintainMinWorkloadServer(avgCpu, avgLat);
     }
 
