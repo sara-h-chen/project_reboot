@@ -24,7 +24,12 @@ var benchmark = {};
 var setDynamic = false;
 var fibHeap = new FibonacciHeap();
 // For the Fibonacci Heap to maintain the server with minimum workload
-var serversAvgCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
+var serversLastAvgCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
+var nodePointers = [null, null, null, null, null];
+// Checks if the increase in CPU usage persists for at least 2 ticks
+var increaseIsPersistent = [false, false, false, false, false];
+// Checks if drops to 0 are due to lost packets
+var zeroIsPersistent = [false, false, false, false, false];
 
 // Track if servers are active
 // Initialize variables to calculate current workloads
@@ -101,7 +106,8 @@ app.get('/load', function(req,res) {
     // console.log('sendStack', sendStack);
 
     // TODO: Insert function to evaluate workload on all nodes here
-
+    // TODO: Pre-empt transfer is exceeds threshold
+    maintainMinWorkloadServer(avgCpu, avgLat);
 
     var callback = function() {
         sendStack.push(benchmark);
@@ -147,22 +153,52 @@ function processUsage(callback) {
     callback();
 }
 
+
+// TODO: Implement both workload and latency prioritization using a command line switch
 /*
- * Use the Fibonacci Heap to maintain which server has the min workload
+ * Use the Fibonacci Heap to maintain server with min workload
  */
-// TODO: Complete the dynamic load balancing
-function getMinWorkloadServer(averageCpus, averageLatencies) {
-    for (var server=0; server < serversActive.length; i++) {
+function maintainMinWorkloadServer(averageCpus, averageLatencies) {
+    for (var server=0; server < serversActive.length; server++) {
         // If server has just become active, insert
-        if(serversActive[server] && serversAvgCpu[server] === 0.0) {
+        if(serversActive[server] && !nodePointers[server]) {
+            // Keep track of the inserted node for each server
             // K: Average workload, V: server
-            fibHeap.insert(averageCpus[server], server);
-            serversAvgCpu[server] = averageCpus[server];
-            console.log('new node inserted ---->>', fibHeap);
+            nodePointers[server] = fibHeap.insert(averageCpus[server], server);
         // If server has been active and has previous workload
         } else if(serversActive[server]) {
-            // TODO: Decrease key if
-            console.log(fibHeap.remove())
+            if(averageCpus[server] <= serversLastAvgCpu[server]) {
+                // Breaks persistence of increase since it hasn't
+                increaseIsPersistent[server] = false;
+
+                // In case latency packets come in empty for a single tick
+                if (averageCpus[server] == 0 && !zeroIsPersistent[server]) {
+                    zeroIsPersistent[server] = true;
+                } else if (averageCpus[server] == 0 && zeroIsPersistent[server]) {
+                    fibHeap.decreaseKey(nodePointers[server], averageCpus[server]);
+                    zeroIsPersistent[server] = false;
+                // Average CPU is not 0
+                } else if (averageCpus[server] < serversLastAvgCpu[server]) {
+                    fibHeap.decreaseKey(nodePointers[server], averageCpus[server]);
+                }
+
+            } else if(averageCpus[server] > serversLastAvgCpu[server]) {
+                if(increaseIsPersistent[server]) {
+                    fibHeap.delete(nodePointers[server]);
+                    nodePointers[server] = fibHeap.insert(averageCpus[server], server);
+                    increaseIsPersistent[server] = false;
+                } else {
+                    // Ignore the temporary increase; do not update the stored value
+                    increaseIsPersistent[server] = true;
+                    continue;
+                }
+            }
         }
+        serversLastAvgCpu[server] = averageCpus[server];
     }
+    // DEBUG
+    // console.log('average cpus this iteration', averageCpus);
+    // console.log('fib heap ========>> ', fibHeap);
+    // console.log('is increase persistent? ', increaseIsPersistent);
+    // console.log('is zero persistent? ', zeroIsPersistent);
 }

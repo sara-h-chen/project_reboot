@@ -29,7 +29,7 @@ We are now working on the static load balancing of the system. Each game server 
 #### Dynamic Load Balancing
 - [ ] Monitor workload on the master server using a Fibonacci heap. Once you hit a threshold on any of the servers then you allocate __only__ to adjacent servers to reduce the overhead of transferring packets between the servers should the player density fall.
 
-- [ ] Fibonacci Heap to maintain the least-loaded server.
+- [x] Fibonacci Heap to maintain the least-loaded server.
 
 - [ ] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
 
@@ -63,3 +63,5 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] Latency and CPU/thread usage differs, depending on hardware. On worse hardware, latency is higher and CPU usage is higher (tested on Dell Inspiron 14 3000 2.2GHz i5, 4GB RAM, 500GB HDD and MacBook Pro 2.3GHz Kaby Lake i5 dual-core processor, 8GB RAM, 256GB SSD storage).
 
 - [ ] The more  you use the `decreaseKey` operation, the more effective the Fib Heap becomes.
+
+- [ ] The nature of JavaScript and the asynchronity of socket communications gives rise to race conditions, which may be architecture dependent.
