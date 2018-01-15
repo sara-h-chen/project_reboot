@@ -7,12 +7,12 @@ var server = require('http').Server(app);
 var fs = require('fs');
 
 var pusage = require('pidusage');
-var math = require('mathjs');
 var redis = require('redis');
 var sub = redis.createClient();
 
 // Manage command line arguments
 var myArgs = require('optimist').argv;
+var FibonacciHeap = require('@tyriar/fibonacci-heap').FibonacciHeap;
 
 // Manage incoming
 var infoStack = [];
@@ -22,7 +22,7 @@ var benchmark = {};
 
 // For the dynamic load balancing
 var setDynamic = false;
-var fibHeap = new math.type.FibonacciHeap();
+var fibHeap = new FibonacciHeap();
 // For the Fibonacci Heap to maintain the server with minimum workload
 var serversAvgCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
 
@@ -148,18 +148,21 @@ function processUsage(callback) {
 }
 
 /*
- * Begin dynamic load balancing with Fib Heap
+ * Use the Fibonacci Heap to maintain which server has the min workload
  */
 // TODO: Complete the dynamic load balancing
-function evaluateWorkload(averageCpus, averageLatencies) {
+function getMinWorkloadServer(averageCpus, averageLatencies) {
     for (var server=0; server < serversActive.length; i++) {
         // If server has just become active, insert
         if(serversActive[server] && serversAvgCpu[server] === 0.0) {
-            fibHeap.insert(server, averageCpus[server]);
+            // K: Average workload, V: server
+            fibHeap.insert(averageCpus[server], server);
             serversAvgCpu[server] = averageCpus[server];
+            console.log('new node inserted ---->>', fibHeap);
         // If server has been active and has previous workload
         } else if(serversActive[server]) {
-            // if
+            // TODO: Decrease key if
+            console.log(fibHeap.remove())
         }
     }
 }

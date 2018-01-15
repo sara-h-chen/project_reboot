@@ -22,9 +22,9 @@
   "license": "MIT",
   "homepage": "https://github.com/Jerenaux/phaserquest#readme",
   "dependencies": {
+    "@tyriar/fibonacci-heap": "^2.0.4",
     "clone": "^2.1.0",
     "express": "^4.14.0",
-    "mathjs": "^3.19.0",
     "mongodb": "^2.2.16",
     "optimist": "^0.6.1",
     "pathfinding": "^0.4.18",
