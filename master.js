@@ -128,6 +128,7 @@ app.get('/load', function(req,res) {
         maintainMinWorkloadServer();
         // TODO: Insert function to evaluate workload on all nodes here
         // TODO: Pre-empt transfer if exceeds threshold
+        // TODO: Test workload evaluation function
     }
 
     var callback = function() {
@@ -231,10 +232,14 @@ function sendCommand(portNumber, hostAddress) {
     var message = Buffer.from('breach');
     udpSocket.send(message, portNumber, hostAddress, function(err) {
         if(err) throw err;
-        udpSocket.close();
     });
 }
 
+/*
+ * Called when workload on server exceeds its threshold;
+ * sends a UDP packet to the least loaded server of the adjacent
+ * servers or the entire system
+ */
 function redistributeWorkload(index, callback) {
     var targetServer;
     // From the 2nd server to the 2nd last server
@@ -260,14 +265,14 @@ function redistributeWorkload(index, callback) {
 
     // On the first server
     } else if (index == 0) {
-        // If active adjacent server exceeds threshold
+        // If adjacent server is active and exceeds threshold
         if(serversActive[index+1]) {
             targetServer = (chosenParameter[index+1] > maxThreshold) ? fibHeap.extractMinimum().value : index+1;
         } else {
             targetServer = fibHeap.extractMinimum().value
         }
 
-        // On the last index
+    // On the last server
     } else if (index == (serversActive.length-1)) {
         if(serversActive[index-1]) {
             targetServer = (chosenParameter[index-1] > maxThreshold) ? fibHeap.extractMinimum().value : index-1;
@@ -276,7 +281,10 @@ function redistributeWorkload(index, callback) {
         }
     }
 
-    var sendToPort = serverAddresses[targetServer][targetServer].port;
-    var sendToHost = serverAddresses[targetServer][targetServer].host;
-    callback(sendToPort, sendToHost);
+    // Prevent sending to self
+    if(targetServer !== index) {
+        var sendToPort = serverAddresses[targetServer][targetServer].port;
+        var sendToHost = serverAddresses[targetServer][targetServer].host;
+        callback(sendToPort, sendToHost);
+    }
 }
