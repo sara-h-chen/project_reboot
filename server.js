@@ -41,6 +41,10 @@ var sub_top = redis.createClient();
 var sub_btm = redis.createClient();
 var pub = redis.createClient();
 
+// Listen for commands from master server
+const dgram = require('dgram');
+var udpSocket = dgram.createSocket('udp6');
+
 var gs = require('./js/server/GameServer.js').GameServer;
 // For the binary protocol of update packets :
 var CoDec = require('./js/CoDec.js').CoDec;
@@ -130,6 +134,9 @@ if(config[servPort].topChannel.length > 0) {
 if(config[servPort].bottomChannel.length > 0) {
     sub_btm.subscribe(config[servPort].bottomChannel);
 }
+
+
+// ================= Socket.io
 
 io.on('connection',function(socket){
     console.log('connection with ID '+socket.id);
@@ -230,6 +237,22 @@ io.on('connection',function(socket){
     setInterval(ping, 5000);
 });
 
+
+// ================= UDP Socket
+
+udpSocket.on('listening', function() {
+    console.log('NOTE: Listening for UDP messages from Master');
+});
+
+udpSocket.on('message', function(msg) {
+    // TODO: Decide which player to offload onto other server
+
+});
+// Listen on 127.0.0.1:6063
+udpSocket.bind(6063);
+
+
+// ================= Server functions
 
 server.setUpdateLoop = function(){
     setInterval(gs.updatePlayers,server.clientUpdateRate);

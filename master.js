@@ -6,6 +6,9 @@ var app = express();
 var server = require('http').Server(app);
 var fs = require('fs');
 
+const dgram = require('dgram');
+var udpSocket = dgram.createSocket('udp6');
+
 var pusage = require('pidusage');
 var redis = require('redis');
 var sub = redis.createClient();
@@ -42,6 +45,11 @@ var conn = [0, 0, 0, 0, 0];
 
 var masterTime = "",
     masterCpu = 0.0;
+
+// TODO: Change this if this threshold doesn't work
+var maxThreshold = 0.4;
+var serverAddresses = JSON.parse(fs.readFileSync(__dirname + '/assets/json/server_addresses.json')).servers;
+sendCommand();
 
 app.use('/assets', express.static(__dirname + '/dashboard/assets'));
 
@@ -107,12 +115,19 @@ app.get('/load', function(req,res) {
     // DEBUG
     // console.log('sendStack', sendStack);
 
-    // TODO: Insert function to evaluate workload on all nodes here
-    // TODO: Pre-empt transfer is exceeds threshold
-
     if(myArgs.d) {
+        if (myArgs.c) {
+            chosenParameter = avgCpu;
+        } else if (myArgs.l) {
+            chosenParameter = avgLat;
+        } else if (!myArgs.c && !myArgs.l) {
+            throw "Missing command line argument";
+        }
+
         // Maintain Fibonacci Heap only if dynamically load balancing
-        maintainMinWorkloadServer(avgCpu, avgLat);
+        maintainMinWorkloadServer();
+        // TODO: Insert function to evaluate workload on all nodes here
+        // TODO: Pre-empt transfer if exceeds threshold
     }
 
     var callback = function() {
@@ -162,12 +177,7 @@ function processUsage(callback) {
 /*
  * Use the Fibonacci Heap to maintain server with min workload
  */
-function maintainMinWorkloadServer(averageCpus, averageLatencies) {
-    if (myArgs.c) {
-        chosenParameter = averageCpus;
-    } else if (myArgs.l) {
-        chosenParameter = averageLatencies;
-    }
+function maintainMinWorkloadServer() {
     for (var server=0; server < serversActive.length; server++) {
         // If server has just become active, insert
         if(serversActive[server] && !nodePointers[server]) {
@@ -202,6 +212,11 @@ function maintainMinWorkloadServer(averageCpus, averageLatencies) {
                     continue;
                 }
             }
+
+            if(chosenParameter[server] > maxThreshold) {
+                var callback = sendCommand;
+                redistributeWorkload(callback);
+            }
         }
         serversLastAvg[server] = chosenParameter[server];
     }
@@ -210,4 +225,46 @@ function maintainMinWorkloadServer(averageCpus, averageLatencies) {
     // console.log('fib heap ========>> ', fibHeap);
     // console.log('is increase persistent? ', increaseIsPersistent);
     // console.log('is zero persistent? ', zeroIsPersistent);
+}
+
+function sendCommand(portNumber, hostAddress) {
+    var message = Buffer.from('breach');
+    udpSocket.send(message, portNumber, hostAddress, function(err) {
+        if(err) throw err;
+        udpSocket.close();
+    });
+}
+
+function redistributeWorkload(callback) {
+    var targetServer;
+    // From the 2nd server to the 2nd last server
+    if (server > 0 && server < (serversActive.length-1)) {
+        // If both adjacent servers exceed the threshold
+        if(chosenParameter[server-1] > maxThreshold && chosenParameter[server+1] > maxThreshold) {
+            targetServer = fibHeap.extractMinimum().value;
+        } else {
+            targetServer = (chosenParameter[server-1] >= chosenParameter[server+1]) ? server+1 : server-1;
+        }
+
+        // On the first server
+    } else if (server == 0) {
+        // If adjacent server exceeds threshold
+        if(chosenParameter[server+1] > maxThreshold) {
+            targetServer = fibHeap.extractMinimum().value;
+        } else {
+            targetServer = server+1;
+        }
+
+        // On the last server
+    } else if (server == (serversActive.length-1)) {
+        if(chosenParameter[server-1] > maxThreshold) {
+            targetServer = fibHeap.extractMinimum().value;
+        } else {
+            targetServer = server-1;
+        }
+    }
+
+    var sendToPort = serverAddresses[targetServer][targetServer].port;
+    var sendToHost = serverAddresses[targetServer][targetServer].host;
+    callback(sendToPort, sendToHost);
 }

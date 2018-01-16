@@ -24,6 +24,7 @@
   "dependencies": {
     "@tyriar/fibonacci-heap": "^2.0.4",
     "clone": "^2.1.0",
+    "dgram": "^1.0.1",
     "express": "^4.14.0",
     "mongodb": "^2.2.16",
     "optimist": "^0.6.1",

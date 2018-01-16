@@ -27,15 +27,19 @@ We are now working on the static load balancing of the system. Each game server 
 - [x] Allow gate to create new players.
 
 #### Dynamic Load Balancing
-- [ ] Monitor workload on the master server using a Fibonacci heap. Once you hit a threshold on any of the servers then you allocate __only__ to adjacent servers to reduce the overhead of transferring packets between the servers should the player density fall.
-
 - [x] Fibonacci Heap to maintain the least-loaded server.
+
+- [ ] Monitor workload on the master server. Once you hit a threshold on any of the servers then you allocate __only__ to adjacent servers to reduce the overhead of transferring packets between the servers should the player density fall.
 
 - [ ] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
 
 - [ ] Upon issuance of command from `master`, server must join other Redis channel. Players can then be transferred, after a defined number of ticks, once receiving on Redis has been stabilized.
  
  - [ ] Only activate the transfer to non-adjacent servers once both adjacent servers exceed their threshold.
+
+- [ ] How do you decide what the right threshold is?
+
+- [ ] Refactor to get list of host addresses, and the port numbers from a JSON file
 
 ### Notes for Paper
 - [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
@@ -65,3 +69,13 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] The more  you use the `decreaseKey` operation, the more effective the Fib Heap becomes.
 
 - [ ] The nature of JavaScript and the asynchronity of socket communications gives rise to race conditions, which may be architecture dependent.
+
+- [ ] Choosing the right threshold is non-trivial.
+
+- [ ] Redis creates a new connection for every Redis client.
+
+- [ ] CPU usage on TCP is higher than on UDP. TCP has congestion control algorithms in-built, so whenever there is congestion in the network TCP connections will slow transfer rates and bring the network out of the congested state.  Moreover, if a packet gets dropped due to congestion or channel errors, TCP retransmits the packet and reduces its congestion window or rate to half.  This is to provide reliability and to ensure the network does not go into congested state.The results seem to show that TCP has a significantly higher CPU usage than UDP for the same bandwidth. [Reference.](https://www.network-builders.com/threads/cpu-usage-tcp-vs-udp.55917/)
+
+- [ ] There are challenges with transferring players in non-continuous regions, like the edges of the map, where there is only one adjacent server.
+
+- [ ] Shift things onto the master server, to reduce computation on the other servers
