@@ -215,7 +215,7 @@ function maintainMinWorkloadServer() {
 
             if(chosenParameter[server] > maxThreshold) {
                 var callback = sendCommand;
-                redistributeWorkload(callback);
+                redistributeWorkload(server, callback);
             }
         }
         serversLastAvg[server] = chosenParameter[server];
@@ -235,23 +235,23 @@ function sendCommand(portNumber, hostAddress) {
     });
 }
 
-function redistributeWorkload(callback) {
+function redistributeWorkload(index, callback) {
     var targetServer;
     // From the 2nd server to the 2nd last server
-    if (server > 0 && server < (serversActive.length-1)) {
+    if (index > 0 && index < (serversActive.length-1)) {
         // If both adjacent servers are active and exceed the threshold
-        if(serversActive[server-1] && serversActive[server+1]) {
-            if(chosenParameter[server-1] > maxThreshold && chosenParameter[server+1] > maxThreshold) {
+        if(serversActive[index-1] && serversActive[index+1]) {
+            if(chosenParameter[index-1] > maxThreshold && chosenParameter[index+1] > maxThreshold) {
                 targetServer = fibHeap.extractMinimum().value;
             } else {
-                targetServer = (chosenParameter[server-1] >= chosenParameter[server+1]) ? server+1 : server-1;
+                targetServer = (chosenParameter[index-1] >= chosenParameter[index+1]) ? index+1 : index-1;
             }
         // Only one adjacent server is active
-        } else if(serversActive[server-1]) {
-            targetServer = (chosenParameter[server-1] > maxThreshold) ? fibHeap.extractMinimum().value : server-1;
+        } else if(serversActive[index-1]) {
+            targetServer = (chosenParameter[index-1] > maxThreshold) ? fibHeap.extractMinimum().value : index-1;
 
-        } else if(serversActive[server+1]) {
-            targetServer = (chosenParameter[server + 1] > maxThreshold) ? fibHeap.extractMinimum().value : server+1;
+        } else if(serversActive[index+1]) {
+            targetServer = (chosenParameter[index+1] > maxThreshold) ? fibHeap.extractMinimum().value : index+1;
 
         // Neither adjacent servers are active
         } else {
@@ -259,18 +259,18 @@ function redistributeWorkload(callback) {
         }
 
     // On the first server
-    } else if (server == 0) {
+    } else if (index == 0) {
         // If active adjacent server exceeds threshold
-        if(serversActive[server+1]) {
-            targetServer = (chosenParameter[server+1] > maxThreshold) ? fibHeap.extractMinimum().value : server+1;
+        if(serversActive[index+1]) {
+            targetServer = (chosenParameter[index+1] > maxThreshold) ? fibHeap.extractMinimum().value : index+1;
         } else {
             targetServer = fibHeap.extractMinimum().value
         }
 
-        // On the last server
-    } else if (server == (serversActive.length-1)) {
-        if(serversActive[server-1]) {
-            targetServer = (chosenParameter[server-1] > maxThreshold) ? fibHeap.extractMinimum().value : server-1;
+        // On the last index
+    } else if (index == (serversActive.length-1)) {
+        if(serversActive[index-1]) {
+            targetServer = (chosenParameter[index-1] > maxThreshold) ? fibHeap.extractMinimum().value : index-1;
         } else {
             targetServer = fibHeap.extractMinimum().value;
         }
