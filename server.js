@@ -246,10 +246,10 @@ udpSocket.on('listening', function() {
 
 udpSocket.on('message', function(msg) {
     // TODO: Decide which player to offload onto other server
-
+    console.log('Received on server side from UDP ====>', msg);
 });
 // Listen on 127.0.0.1:6063
-udpSocket.bind(6063);
+udpSocket.bind(Number(server.address().port) + 1);
 
 
 // ================= Server functions
