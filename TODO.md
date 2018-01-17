@@ -78,4 +78,6 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [ ] There are challenges with transferring players in non-continuous regions, like the edges of the map, where there is only one adjacent server.
 
-- [ ] Shift things onto the master server, to reduce computation on the other servers
+- [ ] Shift things onto the master server, to reduce computation on the other servers.
+
+- [ ] Problems with resolving different IP addresses. IPv6 and IPv4 are non-compatible, and sending from one machine to another requires that they be of the same protocol, or steps have to be taken to make them compatible.

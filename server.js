@@ -43,7 +43,7 @@ var pub = redis.createClient();
 
 // Listen for commands from master server
 const dgram = require('dgram');
-var udpSocket = dgram.createSocket('udp6');
+var udpSocket = dgram.createSocket('udp4');
 
 var gs = require('./js/server/GameServer.js').GameServer;
 // For the binary protocol of update packets :
@@ -244,12 +244,15 @@ udpSocket.on('listening', function() {
     console.log('NOTE: Listening for UDP messages from Master');
 });
 
-udpSocket.on('message', function(msg) {
+udpSocket.on('message', function(msg, info) {
     // TODO: Decide which player to offload onto other server
-    console.log('Received on server side from UDP ====>', msg);
+    console.log('Received on server side from UDP ====>', msg, info);
 });
-// Listen on 127.0.0.1:6063
-udpSocket.bind(Number(server.address().port) + 1);
+// Listen on 127.0.0.1:6060~6064
+var listenOn = Number(server.address().port) + 10;
+udpSocket.bind(listenOn);
+// DEBUG
+// console.log('Listening for UDP packets on ... ', listenOn);
 
 
 // ================= Server functions

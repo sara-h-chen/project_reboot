@@ -7,7 +7,7 @@ var server = require('http').Server(app);
 var fs = require('fs');
 
 const dgram = require('dgram');
-var udpSocket = dgram.createSocket('udp6');
+var udpSocket = dgram.createSocket('udp4');
 
 var pusage = require('pidusage');
 var redis = require('redis');
@@ -231,8 +231,10 @@ function maintainMinWorkloadServer() {
 
 function sendCommand(portNumber, hostAddress) {
     var message = Buffer.from('breach');
-    udpSocket.send(message, portNumber, hostAddress, function(err) {
+    udpSocket.send(message, 0, message.length, portNumber, hostAddress, function(err, bytes) {
         if(err) throw err;
+        // DEBUG
+        // console.log('sending UDP message...');
     });
 }
 
@@ -244,7 +246,7 @@ function sendCommand(portNumber, hostAddress) {
 function redistributeWorkload(fibHeap, index, callback) {
     // DEBUG
     // console.log('redistributing ====> ', fibHeap);
-    var targetServer = index;
+    var targetServer;
     // From the 2nd server to the 2nd last server
     if (index > 0 && index < (serversActive.length-1)) {
         // If both adjacent servers are active and exceed the threshold
@@ -264,8 +266,6 @@ function redistributeWorkload(fibHeap, index, callback) {
         // Neither adjacent servers are active
         } else {
             targetServer = fibHeap.findMinimum().value;
-            // DEBUG
-            // console.log('target ', targetServer);
         }
 
     // On the first server
@@ -286,10 +286,14 @@ function redistributeWorkload(fibHeap, index, callback) {
         }
     }
 
+    // DEBUG
+    // console.log('target ', targetServer, ' index ', index);
+
     // Prevent sending to self
-    if(targetServer !== index) {
-        var sendToPort = serverAddresses[targetServer][targetServer].port;
-        var sendToHost = serverAddresses[targetServer][targetServer].host;
+    // TODO: Make sure you change this to NOT equal
+    if(targetServer == index) {
+        var sendToPort = serverAddresses[0][targetServer].port;
+        var sendToHost = serverAddresses[0][targetServer].host;
         callback(sendToPort, sendToHost);
     }
 }
