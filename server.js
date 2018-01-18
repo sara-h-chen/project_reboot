@@ -136,7 +136,7 @@ if(config[servPort].bottomChannel.length > 0) {
 }
 
 
-// ================= Socket.io
+// ================= SOCKET.IO
 
 io.on('connection',function(socket){
     console.log('connection with ID '+socket.id);
@@ -238,7 +238,7 @@ io.on('connection',function(socket){
 });
 
 
-// ================= UDP Socket
+// ================= UDP SOCKET
 
 udpSocket.on('listening', function() {
     console.log('NOTE: Listening for UDP messages from Master');
@@ -246,16 +246,20 @@ udpSocket.on('listening', function() {
 
 udpSocket.on('message', function(msg, info) {
     // TODO: Decide which player to offload onto other server
+    // DEBUG
     console.log('Received on server side from UDP ====>', msg, info);
+    console.log(gs.players);
+
+    gs.pickPlayerToTransfer();
 });
-// Listen on 127.0.0.1:6060~6064
+// Listen for commands from Master on 127.0.0.1:6060~6064
 var listenOn = Number(server.address().port) + 10;
 udpSocket.bind(listenOn);
 // DEBUG
-// console.log('Listening for UDP packets on ... ', listenOn);
+// console.log('Listening for UDP packets on', listenOn);
 
 
-// ================= Server functions
+// ================= SERVER FUNCTIONS
 
 server.setUpdateLoop = function(){
     setInterval(gs.updatePlayers,server.clientUpdateRate);

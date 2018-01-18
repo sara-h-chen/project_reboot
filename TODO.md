@@ -6,11 +6,17 @@ We are now working on the static load balancing of the system. Each game server 
 
 ### To-Do List
 #### AI Behavior
-- [ ] Create simple AI that wanders around in circles.
+- [x] Create simple AI that wanders around in circles.
 
 - [ ] Improve AI behavior.
 
 - [ ] Issue events that AI can then respond to. 
+
+- [x] Set all monsters to non-aggressive.
+
+- [ ] Change starting location to anywhere on the map. Figure out what the checkpoints are, and create your own checkpoints elsewhere on the map.
+
+- [ ] Refactor code if you have the time.
 
 #### System Monitoring
 - [x] Establish a Master server that receives workload information pushed periodically from each server.
@@ -29,17 +35,15 @@ We are now working on the static load balancing of the system. Each game server 
 #### Dynamic Load Balancing
 - [x] Fibonacci Heap to maintain the least-loaded server.
 
-- [ ] Monitor workload on the master server. Once you hit a threshold on any of the servers then you allocate __only__ to adjacent servers to reduce the overhead of transferring packets between the servers should the player density fall.
+- [x] Monitor workload on the master server. Once you hit a threshold on any of the servers then you allocate __only__ to adjacent servers to reduce the overhead of transferring packets between the servers should the player density fall.
+
+- [x] Only activate the transfer to non-adjacent servers once both adjacent servers exceed their threshold.
 
 - [ ] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
 
 - [ ] Upon issuance of command from `master`, server must join other Redis channel. Players can then be transferred, after a defined number of ticks, once receiving on Redis has been stabilized.
- 
- - [ ] Only activate the transfer to non-adjacent servers once both adjacent servers exceed their threshold.
 
-- [ ] How do you decide what the right threshold is?
-
-- [ ] Refactor to get list of host addresses, and the port numbers from a JSON file
+- [x] Refactor to get list of host addresses, and the port numbers from a JSON file
 
 ### Notes for Paper
 - [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
@@ -80,4 +84,11 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [ ] Shift things onto the master server, to reduce computation on the other servers.
 
-- [ ] Problems with resolving different IP addresses. IPv6 and IPv4 are non-compatible, and sending from one machine to another requires that they be of the same protocol, or steps have to be taken to make them compatible.
+- [ ] Problems with resolving different IP addresses. IPv6 and IPv4 are non-compatible, and sending from one machine to another requires that they be of the same protocol, or steps have to be taken to make them compatible. For example:
+
+| IPv4 | 127.0.0.1 |
+|:----:|-----------|
+| IPv6 |    ::1    |
+
+
+- [ ] How do you decide what the right threshold is?

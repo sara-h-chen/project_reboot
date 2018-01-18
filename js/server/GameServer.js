@@ -52,6 +52,10 @@ var Player = require('./Player.js').Player;
 var Monster = require('./Monster.js').Monster;
 var Item = require('./Item.js').Item;
 
+// TODO: Track the player closest to the edges whenever they move
+var playerClosestToNextServer = undefined;
+var playerClosestToPreviousServer = undefined;
+
 GameServer.setup = function(portNumber) {
     var key;
     for (key in servers) {
@@ -435,6 +439,7 @@ GameServer.removeFromLocation = function(entity){
     GameServer.AOIfromTiles.getFirst(entity.x,entity.y).deleteEntity(entity);
 };
 
+// TODO: Change this to start anywhere on the map
 GameServer.determineStartingPosition = function(){
     // Determine where a new player should appear for the first time in the game
     var checkpoints = GameServer.objects.checkpoints;
@@ -442,6 +447,9 @@ GameServer.determineStartingPosition = function(){
     var x = randomInt(startArea.x, (startArea.x+startArea.width));
     var y = randomInt(startArea.y, (startArea.y+startArea.height));
     return {x:Math.floor(x/GameServer.map.tilewidth),y:Math.floor(y/GameServer.map.tileheight)};
+
+    // TODO: Make sure you check for collisions
+    // return {x: Math.floor(Math.random() * width of complete map), y: Math.floor(Math.random() * height of complete map)};
 };
 
 GameServer.computeTileCoords = function(x,y){ // Convert pixel coordinates to tile coordinates
@@ -550,7 +558,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
     player['responsibleMachine'] = serverAlloc.port;
     var socketInfo = {
         latency: socket.latency,
-            id: socket.id
+        id: socket.id
     };
     var playerInfo = {
         mongoID: player.getMongoID(),
@@ -588,11 +596,25 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         orientation: orientation
     };
     // Share within overlapping regions
-    // TODO: Have a boolean variable to OR with this so you can transfer if a server is at its limit
     if (path[path.length-1].y > serverAlloc.serverMax) {
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port + 1));
     } else if (path[path.length-1].y < serverAlloc.serverMin) {
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port - 1));
+    }
+
+    // Keep track of player closest to boundary
+    // TODO: Move into block above? Only within Redis controlled region?
+    if(player.y < playerClosestToPreviousServer.y || playerClosestToPreviousServer == undefined) {
+        playerClosestToPreviousServer = {
+            id: player.id,
+            y: player.y
+        }
+    }
+    if(player.y > playerClosestToNextServer.y || playerClosestToNextServer == undefined) {
+        playerClosestToPreviousServer = {
+            id: player.id,
+            y: player.y
+        }
     }
 
     return true;
@@ -624,7 +646,7 @@ GameServer.handleOutOfBounds = function(pathInfo,socketInfo,player,socket,portNu
         oldSocket: socketInfo,
         pathInfo: pathInfo
     };
-    GameServer.addStamp(transferPacket);
+    addStamp(transferPacket);
 
     socket.emit('alloc', transferPacket);
     GameServer.removePlayer(socket.id);
@@ -653,6 +675,35 @@ GameServer.receiveTransfer = function(packet,socket) {
     // Replace entire player with newly transferred
     GameServer.players[deserializedPlayer.id] = deserializedPlayer;
     GameServer.finalizePlayer(true,socket,deserializedPlayer);
+};
+
+GameServer.pickPlayerToTransfer = function() {
+    /*
+     * Iterate through players to see which one is closest to the area boundary
+     * so that you can transfer the player to another server
+     * This should lie within the Redis region
+     */
+    var playerClosestToBoundaries = {
+        id: undefined,
+        smallest_y: undefined,
+        largest_y: undefined
+    };
+
+    // TODO: What happens if none lie within the Redis region?
+    for (var player in GameServer.players) {
+        // skip loop if the property is from prototype
+        if (!GameServer.players.hasOwnProperty(player)) continue;
+
+        var obj = GameServer.players[player];
+        // TODO: Complete this function
+        // for (var prop in obj) {
+        //     // skip loop if the property is from prototype
+        //     if(!obj.hasOwnProperty(prop)) continue;
+        //
+        //     // your code
+        //     console.log('player print', prop + " = " + obj[prop]);
+        // }
+    }
 };
 
 GameServer.adjacent = function(A,B){
@@ -918,18 +969,18 @@ function getIDfromCoords(x,y){
     return Math.floor(x/GameServer.AOIwidth)+(AOIutils.nbAOIhorizontal*Math.floor(y/GameServer.AOIheight));
 }
 
+// Functions to add time stamp; for calculating latency
+function addStamp(packet){
+    packet.stamp = getShortStamp();
+    return packet;
+}
+
+function getShortStamp(){
+    return parseInt(Date.now().toString().substr(-9));
+}
+
 Array.prototype.diff = function(a) { // returns the elements in the array that are not in array a
     return this.filter(function(i) {
         return a.indexOf(i) < 0;
     });
-};
-
-// Functions to add time stamp; for calculating latency
-GameServer.addStamp = function(packet){
-    packet.stamp = GameServer.getShortStamp();
-    return packet;
-};
-
-GameServer.getShortStamp = function(){
-    return parseInt(Date.now().toString().substr(-9));
 };

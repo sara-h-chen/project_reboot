@@ -20,8 +20,8 @@ function Monster(x,y,monster){
     }
     this.lootTable = GameServer.formatLootTable(info.lootTable);
     this.monster = info.id; // the id of the monster (rat, ...) (int)
-    this.aggro = info.aggressive;
-    if(this.aggro === undefined) this.aggro = true;
+    // Set monsters to passive
+    this.aggro = false;
     this.maxLife = info.life;
     this.life = this.maxLife;
     this.speed = info.speed;
