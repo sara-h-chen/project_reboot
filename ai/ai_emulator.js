@@ -45,8 +45,9 @@ function doBotStuff(player, index, cycle = 0) {
     setTimeout(() => doBotStuff({x: player.x + delta.x, y: player.y + delta.y}, index, (cycle + 1) % 4), 1000);
 }
 
-totalBots = 100;
+totalBots = 1;
 var BotClients = [];
+// TODO: Make bots connect to the server
 for (var i = 0; i < totalBots; i++) {
     BotClients.push(createBotClient(i, doBotStuff));
     BotClients[i].requestData();

@@ -53,8 +53,8 @@ var Monster = require('./Monster.js').Monster;
 var Item = require('./Item.js').Item;
 
 // TODO: Track the player closest to the edges whenever they move
-var playerClosestToNextServer = undefined;
-var playerClosestToPreviousServer = undefined;
+// var playerClosestToNextServer = undefined;
+// var playerClosestToPreviousServer = undefined;
 
 GameServer.setup = function(portNumber) {
     var key;
@@ -439,7 +439,7 @@ GameServer.removeFromLocation = function(entity){
     GameServer.AOIfromTiles.getFirst(entity.x,entity.y).deleteEntity(entity);
 };
 
-// TODO: Change this to start anywhere on the map
+// TODO: Test this
 GameServer.determineStartingPosition = function(){
     // Determine where a new player should appear for the first time in the game
     var checkpoints = GameServer.objects.checkpoints;
@@ -447,9 +447,6 @@ GameServer.determineStartingPosition = function(){
     var x = randomInt(startArea.x, (startArea.x+startArea.width));
     var y = randomInt(startArea.y, (startArea.y+startArea.height));
     return {x:Math.floor(x/GameServer.map.tilewidth),y:Math.floor(y/GameServer.map.tileheight)};
-
-    // TODO: Make sure you check for collisions
-    // return {x: Math.floor(Math.random() * width of complete map), y: Math.floor(Math.random() * height of complete map)};
 };
 
 GameServer.computeTileCoords = function(x,y){ // Convert pixel coordinates to tile coordinates
@@ -604,18 +601,18 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
 
     // Keep track of player closest to boundary
     // TODO: Move into block above? Only within Redis controlled region?
-    if(player.y < playerClosestToPreviousServer.y || playerClosestToPreviousServer == undefined) {
-        playerClosestToPreviousServer = {
-            id: player.id,
-            y: player.y
-        }
-    }
-    if(player.y > playerClosestToNextServer.y || playerClosestToNextServer == undefined) {
-        playerClosestToPreviousServer = {
-            id: player.id,
-            y: player.y
-        }
-    }
+    // if(player.y < playerClosestToPreviousServer.y || playerClosestToPreviousServer == undefined) {
+    //     playerClosestToPreviousServer = {
+    //         id: player.id,
+    //         y: player.y
+    //     }
+    // }
+    // if(player.y > playerClosestToNextServer.y || playerClosestToNextServer == undefined) {
+    //     playerClosestToPreviousServer = {
+    //         id: player.id,
+    //         y: player.y
+    //     }
+    // }
 
     return true;
 };

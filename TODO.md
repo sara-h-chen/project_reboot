@@ -8,6 +8,8 @@ We are now working on the static load balancing of the system. Each game server 
 #### AI Behavior
 - [x] Create simple AI that wanders around in circles.
 
+- [ ] Rewrite bot code to have it respond to distributed system.
+
 - [ ] Improve AI behavior.
 
 - [ ] Issue events that AI can then respond to. 

@@ -129,13 +129,14 @@ var getServerAssignment = function(data, callback) {
         if (err) throw err;
         if (!doc) {
             callback(startingServer);
+        } else {
+            var location = {
+                'x': doc.x,
+                'y': doc.y
+            };
+            var port = serverAssignment(location);
+            callback(port);
         }
-        var location = {
-            'x': doc.x,
-            'y': doc.y
-        };
-        var port = serverAssignment(location);
-        callback(port);
     });
 };
 
