@@ -439,7 +439,6 @@ GameServer.removeFromLocation = function(entity){
     GameServer.AOIfromTiles.getFirst(entity.x,entity.y).deleteEntity(entity);
 };
 
-// TODO: Test this
 GameServer.determineStartingPosition = function(){
     // Determine where a new player should appear for the first time in the game
     var checkpoints = GameServer.objects.checkpoints;
@@ -884,11 +883,14 @@ GameServer.updatePlayers = function(){ //Function responsible for setting up and
 // =================================
 // Code related to AOI management
 
-GameServer.clearAOIs = function(){
-    GameServer.dirtyAOIs.forEach(function(aoi){
-        GameServer.AOIs[aoi].clear();
-    });
-    GameServer.dirtyAOIs.clear();
+GameServer.clearAOIs = function() {
+    // Make check for slow hardware
+    if (GameServer.dirtyAOIs) {
+        GameServer.dirtyAOIs.forEach(function(aoi) {
+            GameServer.AOIs[aoi].clear();
+        });
+        GameServer.dirtyAOIs.clear();
+    }
 };
 
 GameServer.listAOIsFromSocket = function(socketID){

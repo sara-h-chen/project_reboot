@@ -1,6 +1,6 @@
 var io = require('socket.io-client');
 
-// TODO: Figure out why you cannot connect your bot to your servers
+// TODO: Figure out why other players don't show up
 // TODO: Change this so it doesn't require the default exports to be added in these files
 // TODO: Figure out why Decoder needs the extra import for CoDec
 var CoDec = require('./CoDec.js').default;
@@ -15,12 +15,6 @@ function createBotClient(index, callback) {
         startup: true
     };
     BotClient.socket = io.connect('http://127.0.0.1:8081/');
-    console.log(BotClient.socket);
-
-    BotClient.socket.on('connect', function() {
-        console.log('connected');
-    });
-    process.exit();
 
     var onevent = BotClient.socket.onevent;
 
@@ -72,12 +66,14 @@ function createBotClient(index, callback) {
     // });
 
     BotClient.socket.on('alloc',function(packet) {
-        console.log('received packet on bot', packet);
+        // DEBUG
+        // console.log('received packet on bot', packet);
         BotClient.socketFunctions(packet);
     });
 
     BotClient.socketFunctions = function(packet) {
-        console.log('bot connected');
+        // DEBUG
+        // console.log('bot connected');
         BotClient.socket.disconnect();
         BotClient.socket = io.connect('http://127.0.0.1:' + packet.portNumber + '/');
 
@@ -88,7 +84,7 @@ function createBotClient(index, callback) {
             BotClient.socket.emit('transfer', packet);
         }
 
-        if (BotClient.startup) {
+        if(BotClient.startup) {
             BotClient.requestData();
             BotClient.startup = false;
         }
@@ -131,7 +127,6 @@ function createBotClient(index, callback) {
             or:finalOrientation
         });
     };
-
     return BotClient;
 }
 

@@ -94,3 +94,7 @@ We are now working on the static load balancing of the system. Each game server 
 
 
 - [ ] How do you decide what the right threshold is?
+
+- [ ] ECMAScript 5 vs 6.
+
+- [ ] Production grade tools like Redis and MongoDB are optimized and their internal workings are not accessible.

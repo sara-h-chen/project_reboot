@@ -9,27 +9,6 @@ var collisionArray = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 easystar.setGrid(collisionArray);
 easystar.setAcceptableTiles([0]);
 
-// function doBotStuff() {
-//     var cycle = 0;
-//     function square() {
-//         if (!botEnabled) {
-//             return;
-//         }
-//         if (Game.player) {
-//             console.log("Forced to move");
-//             cycle += 1;
-//             var position = Game.computeTileCoords(Game.player.x, Game.player.y);
-//             step = 3;
-//             var dx = cycle % 2 == 0 ? cycle % 4 == 0 ? step : -step : 0;
-//             var dy = cycle % 2 == 1 ? cycle % 4 == 1 ? step : -step : 0;
-//             var position = new Phaser.Point(position.x + dx, position.y + dy);
-//             Game.player.prepareMovement(position, 0, {action: 0}, 0, true);
-//         }
-//         setTimeout(square, 1000);
-//     };
-//     square();
-// };
-
 function doBotStuff(player, index, cycle = 0) {
     // TODO: Write a load model
     start = {};
@@ -45,9 +24,8 @@ function doBotStuff(player, index, cycle = 0) {
     setTimeout(() => doBotStuff({x: player.x + delta.x, y: player.y + delta.y}, index, (cycle + 1) % 4), 1000);
 }
 
-totalBots = 1;
+totalBots = 20;
 var BotClients = [];
-// TODO: Make bots connect to the server
 for (var i = 0; i < totalBots; i++) {
     BotClients.push(createBotClient(i, doBotStuff));
     BotClients[i].requestData();
