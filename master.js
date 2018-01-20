@@ -206,7 +206,6 @@ function maintainMinWorkloadServer() {
                     nodePointers[server] = fibHeap.insert(chosenParameter[server], server);
                     increaseIsPersistent[server] = false;
 
-                    // TODO: Change this to more than two ticks - currently checks if it increases for two ticks
                     // Check only if increase is persistent
                     if(chosenParameter[server] > maxThreshold) {
                         var callback = sendCommand;

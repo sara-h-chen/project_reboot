@@ -43,8 +43,6 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [ ] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
 
-- [ ] Upon issuance of command from `master`, server must join other Redis channel. Players can then be transferred, after a defined number of ticks, once receiving on Redis has been stabilized.
-
 - [x] Refactor to get list of host addresses, and the port numbers from a JSON file
 
 ### Notes for Paper
@@ -99,4 +97,8 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [ ] Production grade tools like Redis and MongoDB are optimized and their internal workings are not accessible.
 
-- [ ] One cannot simply transfer a player, due to its AOI. Expensive to transfer both the player, along with all the objects within its AOI.
+- [ ] One cannot simply transfer a player, due to its AOI. Expensive to transfer both the player, along with all the objects within its AOI. May defeat the purpose of transferring the player if it places more load on the already overloaded server. Theoretically possible to transfer players to non-adjacent servers, but loss of AOI information. So only possible to transfer players when servers are already sharing information about them. Potentially solvable by increasing the number of systems, and always having a machine to replicate data, with overlapping regions. However, this may lead to resource overprovisioning.
+
+- [ ] Snapshots of the servers are made every 5 seconds. So, how long will you leave the problem to persist before you decide that it isn't just a sudden spike? This, in itself, is a non-trivial problem.
+
+- [ ] Adding more functionality to the game increases the runtime of the code and may slow down the server's responsiveness to the client. The more complex the code, the slower the update rate has to be, and this leads to increased latency. Particularly for interpreted languages like JavaScript. Requires much optimization on the server side, or more powerful hardware.

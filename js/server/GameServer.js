@@ -589,9 +589,6 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
     }
 
-    // DEBUG
-    console.log('players closest to cut off', playerClosestToNextServer, playerClosestToPreviousServer);
-
     // Prepare information to handover to next server
     var pathInfo = {
         path: path,
@@ -675,25 +672,19 @@ GameServer.receiveTransfer = function(packet,socket) {
 
 // Pre-empt transfer of player within Redis region
 GameServer.pickPlayerToTransfer = function() {
-    playerClosestToPreviousServer = undefined;
-    playerClosestToNextServer = undefined;
+    if(playerClosestToPreviousServer && playerClosestToNextServer) {
+        let topDifference = Math.abs(playerClosestToPreviousServer.y - serverAlloc.serverMin);
+        let bottomDifference = Math.abs(serverAlloc.serverMax - playerClosestToNextServer.y);
+        var playerClosestToBoundaries = (topDifference < bottomDifference) ? Object.assign({}, playerClosestToPreviousServer) : Object.assign({}, playerClosestToNextServer);
 
-    var playerClosestToBoundaries;
+        // DEBUG
+        // console.log('comparison between two', playerClosestToPreviousServer, playerClosestToNextServer);
+        // console.log('returned closest ', playerClosestToBoundaries);
 
-    // TODO: What happens if none lie within the Redis region?
-    for (var player in GameServer.players) {
-        // skip loop if the property is from prototype
-        if (!GameServer.players.hasOwnProperty(player)) continue;
+        playerClosestToPreviousServer = undefined;
+        playerClosestToNextServer = undefined;
 
-        var obj = GameServer.players[player];
-        // TODO: Complete this function
-        // for (var prop in obj) {
-        //     // skip loop if the property is from prototype
-        //     if(!obj.hasOwnProperty(prop)) continue;
-        //
-        //     // your code
-        //     console.log('player print', prop + " = " + obj[prop]);
-        // }
+        return playerClosestToBoundaries;
     }
 };
 
@@ -714,6 +705,8 @@ GameServer.findFurthestPlayers = function(player) {
             y: player.y
         }
     }
+    // DEBUG
+    // console.log('players closest to cut off', playerClosestToNextServer, playerClosestToPreviousServer);
 };
 
 GameServer.adjacent = function(A,B){
