@@ -18,7 +18,7 @@ function createBotClient(index, callback) {
 
     var onevent = BotClient.socket.onevent;
 
-    BotClient.socket.onevent = function (packet) {
+    BotClient.socket.onevent = function(packet) {
         // if(!Game.playerIsInitialized && packet.data[0] != BotClient.initEventName && packet.data[0] != 'dbError'){
             // BotClient.eventsQueue.push(packet);
         // }else{

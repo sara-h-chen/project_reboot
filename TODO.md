@@ -8,7 +8,7 @@ We are now working on the static load balancing of the system. Each game server 
 #### AI Behavior
 - [x] Create simple AI that wanders around in circles.
 
-- [ ] Rewrite bot code to have it respond to distributed system.
+- [x] Rewrite bot code to have it respond to distributed system.
 
 - [ ] Improve AI behavior.
 
@@ -16,7 +16,7 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [x] Set all monsters to non-aggressive.
 
-- [ ] Change starting location to anywhere on the map. Figure out what the checkpoints are, and create your own checkpoints elsewhere on the map.
+- [x] Change starting location to anywhere on the map. Figure out what the checkpoints are, and create your own checkpoints elsewhere on the map.
 
 - [ ] Refactor code if you have the time.
 
@@ -98,3 +98,5 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] ECMAScript 5 vs 6.
 
 - [ ] Production grade tools like Redis and MongoDB are optimized and their internal workings are not accessible.
+
+- [ ] One cannot simply transfer a player, due to its AOI. Expensive to transfer both the player, along with all the objects within its AOI.

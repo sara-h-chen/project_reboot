@@ -306,3 +306,6 @@ Beach
 11, 275 height x2 width x2
 
 tilewidth  32 32
+
+Removed from database
+{"height":160,"id":302,"name":"","properties":{},"rotation":0,"type":"start","visible":true,"width":160,"x":1280,"y":7424}

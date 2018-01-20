@@ -53,8 +53,8 @@ var Monster = require('./Monster.js').Monster;
 var Item = require('./Item.js').Item;
 
 // TODO: Track the player closest to the edges whenever they move
-// var playerClosestToNextServer = undefined;
-// var playerClosestToPreviousServer = undefined;
+var playerClosestToNextServer;
+var playerClosestToPreviousServer;
 
 GameServer.setup = function(portNumber) {
     var key;
@@ -440,9 +440,12 @@ GameServer.removeFromLocation = function(entity){
 };
 
 GameServer.determineStartingPosition = function(){
+    let minimum = (serverAlloc.serverNumber % 6050) * 5;
+    let maximum = minimum + 4;
+
     // Determine where a new player should appear for the first time in the game
     var checkpoints = GameServer.objects.checkpoints;
-    var startArea = checkpoints[Math.floor(Math.random()*checkpoints.length)];
+    var startArea = checkpoints[Math.floor(Math.random() * (maximum - minimum + 1)) + minimum];
     var x = randomInt(startArea.x, (startArea.x+startArea.width));
     var y = randomInt(startArea.y, (startArea.y+startArea.height));
     return {x:Math.floor(x/GameServer.map.tilewidth),y:Math.floor(y/GameServer.map.tileheight)};
@@ -577,12 +580,17 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
 
     // Responsible servers share updates until client disconnects
     if (path[path.length-1].y > (serverAlloc.serverMax - 25) && (player.responsibleMachine === GameServer.portNumber)) {
+        GameServer.findFurthestPlayers(player);
         // DEBUG
         // console.log('-------------------------', finalPacket);
         redisPub.publish(serverAlloc.bottomOverlapChannel, JSON.stringify(finalPacket));
     } else if (path[path.length-1].y < (serverAlloc.serverMin + 25) && (player.responsibleMachine === GameServer.portNumber)) {
+        GameServer.findFurthestPlayers(player);
         redisPub.publish(serverAlloc.topOverlapChannel, JSON.stringify(finalPacket));
     }
+
+    // DEBUG
+    console.log('players closest to cut off', playerClosestToNextServer, playerClosestToPreviousServer);
 
     // Prepare information to handover to next server
     var pathInfo = {
@@ -591,27 +599,19 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         action: action,
         orientation: orientation
     };
-    // Share within overlapping regions
+    // Trigger handover to the adjacent servers
     if (path[path.length-1].y > serverAlloc.serverMax) {
+        // Reassign other player as playerClosestToNextServer
+        if(player.id === playerClosestToNextServer.id) {
+            playerClosestToNextServer = undefined;
+        }
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port + 1));
     } else if (path[path.length-1].y < serverAlloc.serverMin) {
+        if(player.id === playerClosestToPreviousServer.id) {
+            playerClosestToPreviousServer = undefined;
+        }
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port - 1));
     }
-
-    // Keep track of player closest to boundary
-    // TODO: Move into block above? Only within Redis controlled region?
-    // if(player.y < playerClosestToPreviousServer.y || playerClosestToPreviousServer == undefined) {
-    //     playerClosestToPreviousServer = {
-    //         id: player.id,
-    //         y: player.y
-    //     }
-    // }
-    // if(player.y > playerClosestToNextServer.y || playerClosestToNextServer == undefined) {
-    //     playerClosestToPreviousServer = {
-    //         id: player.id,
-    //         y: player.y
-    //     }
-    // }
 
     return true;
 };
@@ -673,17 +673,12 @@ GameServer.receiveTransfer = function(packet,socket) {
     GameServer.finalizePlayer(true,socket,deserializedPlayer);
 };
 
+// Pre-empt transfer of player within Redis region
 GameServer.pickPlayerToTransfer = function() {
-    /*
-     * Iterate through players to see which one is closest to the area boundary
-     * so that you can transfer the player to another server
-     * This should lie within the Redis region
-     */
-    var playerClosestToBoundaries = {
-        id: undefined,
-        smallest_y: undefined,
-        largest_y: undefined
-    };
+    playerClosestToPreviousServer = undefined;
+    playerClosestToNextServer = undefined;
+
+    var playerClosestToBoundaries;
 
     // TODO: What happens if none lie within the Redis region?
     for (var player in GameServer.players) {
@@ -699,6 +694,25 @@ GameServer.pickPlayerToTransfer = function() {
         //     // your code
         //     console.log('player print', prop + " = " + obj[prop]);
         // }
+    }
+};
+
+// Keep track of player closest to boundary
+// NOTE: Player must lie within Redis region
+GameServer.findFurthestPlayers = function(player) {
+    if(playerClosestToPreviousServer === undefined ||
+        (player.y < playerClosestToPreviousServer.y && player.y < serverAlloc.serverMin+25)) {
+        playerClosestToPreviousServer = {
+            id: player.id,
+            y: player.y
+        }
+    }
+    if(playerClosestToNextServer === undefined ||
+        (player.y > playerClosestToNextServer.y && player.y > serverAlloc.serverMax-25)) {
+        playerClosestToNextServer = {
+            id: player.id,
+            y: player.y
+        }
     }
 };
 

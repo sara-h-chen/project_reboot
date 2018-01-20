@@ -38,7 +38,7 @@ var fs = require('fs');
  * 6053: Starting area
  * 6054: Beach
  */
-var startingServer = 6053;
+var serversToChooseFrom = [6050,6051,6052,6053,6054];
 
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
@@ -128,7 +128,8 @@ var getServerAssignment = function(data, callback) {
         // console.log('---------------- player ', doc);
         if (err) throw err;
         if (!doc) {
-            callback(startingServer);
+            var randomAllocation = serversToChooseFrom[Math.floor(Math.random()*serversToChooseFrom.length)];
+            callback(randomAllocation);
         } else {
             var location = {
                 'x': doc.x,
