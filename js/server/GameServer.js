@@ -4,9 +4,8 @@
 
 var fs = require('fs');
 var PF = require('pathfinding');
-var clone = require('clone'); // used to clone objects, essentially used for clonick update packets
-var rwc = require('random-weighted-choice'); // used to randomly decide which loot a monster should
-var pup = require('./PersonalUpdatePacket');
+var clone = require('clone'); // used to clone objects, essentially used for cloning update packets
+var rwc = require('random-weighted-choice'); // used to randomly decide which loot a monster should drop
 
 // For the handover
 var servers = JSON.parse(fs.readFileSync(__dirname + '/../../assets/json/servers_alloc.json')).servers;
@@ -34,10 +33,11 @@ var GameServer = {
     nbConnectedChanged: false, // has the number of connected players changed since last update packet or not
     players: {}, // map of all connected players, fetchable by id
     socketMap: {}, // map of socket id's to the player id's of the associated players
-    IDmap: {}, // map of player id's to their mondo db uid's
+    IDmap: {}, // map of player id's to their mongodb uid's
     portNumber: 0
 };
 
+// Allow server to store its own details
 var serverAlloc;
 
 module.exports.GameServer = GameServer;
@@ -52,9 +52,11 @@ var Player = require('./Player.js').Player;
 var Monster = require('./Monster.js').Monster;
 var Item = require('./Item.js').Item;
 
-// TODO: Track the player closest to the edges whenever they move
+// For load balancing
 var playerClosestToNextServer;
 var playerClosestToPreviousServer;
+var playerClosestToBoundaries;
+var transferNextIteration = false;
 
 GameServer.setup = function(portNumber) {
     var key;
@@ -597,17 +599,26 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         orientation: orientation
     };
     // Trigger handover to the adjacent servers
-    if (path[path.length-1].y > serverAlloc.serverMax) {
+    // TODO: Find out why the player gets transferred back immediately
+    // Player transfers back immediately because it is over the max threshold
+    if (path[path.length-1].y > serverAlloc.serverMax || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
         // Reassign other player as playerClosestToNextServer
-        if(player.id === playerClosestToNextServer.id) {
+        if(playerClosestToNextServer && player.id === playerClosestToNextServer.id) {
             playerClosestToNextServer = undefined;
         }
+        console.log('player moving to next server', player.id, player.y, playerClosestToNextServer, transferNextIteration);
+
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port + 1));
-    } else if (path[path.length-1].y < serverAlloc.serverMin) {
-        if(player.id === playerClosestToPreviousServer.id) {
+        transferNextIteration = false;
+    } else if (path[path.length-1].y < serverAlloc.serverMin || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
+        if(playerClosestToPreviousServer && player.id === playerClosestToPreviousServer.id) {
             playerClosestToPreviousServer = undefined;
         }
+
+        console.log('player moving to previous server', player.id, player.y, playerClosestToPreviousServer, transferNextIteration);
+
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port - 1));
+        transferNextIteration = false;
     }
 
     return true;
@@ -675,16 +686,16 @@ GameServer.pickPlayerToTransfer = function() {
     if(playerClosestToPreviousServer && playerClosestToNextServer) {
         let topDifference = Math.abs(playerClosestToPreviousServer.y - serverAlloc.serverMin);
         let bottomDifference = Math.abs(serverAlloc.serverMax - playerClosestToNextServer.y);
-        var playerClosestToBoundaries = (topDifference < bottomDifference) ? Object.assign({}, playerClosestToPreviousServer) : Object.assign({}, playerClosestToNextServer);
+        playerClosestToBoundaries = (topDifference < bottomDifference) ? Object.assign({}, playerClosestToPreviousServer) : Object.assign({}, playerClosestToNextServer);
 
         // DEBUG
         // console.log('comparison between two', playerClosestToPreviousServer, playerClosestToNextServer);
         // console.log('returned closest ', playerClosestToBoundaries);
 
+        transferNextIteration = true;
+
         playerClosestToPreviousServer = undefined;
         playerClosestToNextServer = undefined;
-
-        return playerClosestToBoundaries;
     }
 };
 

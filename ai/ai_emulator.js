@@ -24,7 +24,7 @@ function doBotStuff(player, index, cycle = 0) {
     setTimeout(() => doBotStuff({x: player.x + delta.x, y: player.y + delta.y}, index, (cycle + 1) % 4), 1000);
 }
 
-totalBots = 20;
+totalBots = 50;
 var BotClients = [];
 for (var i = 0; i < totalBots; i++) {
     BotClients.push(createBotClient(i, doBotStuff));

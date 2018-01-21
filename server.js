@@ -311,8 +311,9 @@ udpSocket.on('listening', function() {
 
 udpSocket.on('message', function(msg, info) {
     // DEBUG
-    // console.log('Received on server side from UDP ====>', msg, info);
+    console.log('Received on server side from UDP ====>', msg, info);
     // console.log(gs.players);
+    // TODO: Once chosen, offload to another server
     gs.pickPlayerToTransfer();
 });
 // Listen for commands from Master on 127.0.0.1:6060~6064

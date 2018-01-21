@@ -12,7 +12,11 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [ ] Improve AI behavior.
 
-- [ ] Issue events that AI can then respond to. 
+- [ ] Issue events that AI can then respond to.
+
+- [ ] Fix reset on AI.
+
+- [ ] Find out why the bots are not showing up on the shards.
 
 - [x] Set all monsters to non-aggressive.
 
@@ -102,3 +106,7 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] Snapshots of the servers are made every 5 seconds. So, how long will you leave the problem to persist before you decide that it isn't just a sudden spike? This, in itself, is a non-trivial problem.
 
 - [ ] Adding more functionality to the game increases the runtime of the code and may slow down the server's responsiveness to the client. The more complex the code, the slower the update rate has to be, and this leads to increased latency. Particularly for interpreted languages like JavaScript. Requires much optimization on the server side, or more powerful hardware.
+
+- [ ] Do not respond to temporary spikes, because otherwise may generate more latency/workload than it saves.
+
+- [ ] If an overloaded server transfers to an adjacent server that becomes overloaded at that exact moment, and the player gets transferred back, then this is detrimental towards the system.
