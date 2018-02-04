@@ -601,6 +601,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
     // Trigger handover to the adjacent servers
     // TODO: Find out why the player gets transferred back immediately
     // Player transfers back immediately because it is over the max threshold
+    // Should I move the boundaries? No
     if (path[path.length-1].y > serverAlloc.serverMax || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
         // Reassign other player as playerClosestToNextServer
         if(playerClosestToNextServer && player.id === playerClosestToNextServer.id) {

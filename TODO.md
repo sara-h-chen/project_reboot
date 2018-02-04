@@ -110,3 +110,9 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] Do not respond to temporary spikes, because otherwise may generate more latency/workload than it saves.
 
 - [ ] If an overloaded server transfers to an adjacent server that becomes overloaded at that exact moment, and the player gets transferred back, then this is detrimental towards the system.
+
+- [ ] It is difficult to implement a Fibonacci Heap efficiently. Most implementations are not optimized, and may, in practice, have a greater runtime than the binary, or binomial heap. Because of large constant.
+
+- [ ] The Fibonacci Heap's runtime analysis is based on amortized running time. May not be worth it on such a small number of nodes.
+
+- [ ] Moving boundaries gives you an aggregate effect where too many players might end up getting sent to adjacent servers.
