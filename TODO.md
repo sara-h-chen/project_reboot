@@ -116,3 +116,5 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] The Fibonacci Heap's runtime analysis is based on amortized running time. May not be worth it on such a small number of nodes.
 
 - [ ] Moving boundaries gives you an aggregate effect where too many players might end up getting sent to adjacent servers.
+
+- [ ] Already with relatively simple logic on the servers, you get high latency as the server tries to respond to a large number of players. Could be due to the fact that some languages are slower than others, which explains why games like WoW depend upon languages like Lua.

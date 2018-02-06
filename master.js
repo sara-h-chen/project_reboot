@@ -232,7 +232,7 @@ function sendCommand(portNumber, hostAddress) {
     udpSocket.send(new Buffer(0), 0, 0, portNumber, hostAddress, function(err) {
         if (err) throw err;
         // DEBUG
-        // console.log('sending UDP message...');
+        console.log('sending UDP message...');
     });
 }
 

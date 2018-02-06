@@ -34,7 +34,8 @@ var GameServer = {
     players: {}, // map of all connected players, fetchable by id
     socketMap: {}, // map of socket id's to the player id's of the associated players
     IDmap: {}, // map of player id's to their mongodb uid's
-    portNumber: 0
+    portNumber: 0,
+    otherPlayers: new Set()
 };
 
 // Allow server to store its own details
@@ -109,6 +110,7 @@ GameServer.makeIDmap = function(collection,map){
         map[e.id] = key;
     });
 };
+
 
 // =========================
 // Code related to reading map and setting up world
@@ -599,26 +601,37 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         orientation: orientation
     };
     // Trigger handover to the adjacent servers
-    // TODO: Find out why the player gets transferred back immediately
-    // Player transfers back immediately because it is over the max threshold
-    // Should I move the boundaries? No
-    if (path[path.length-1].y > serverAlloc.serverMax || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
+    if ((path[path.length-1].y > serverAlloc.serverMax && !GameServer.otherPlayers.has(player.id)) || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
         // Reassign other player as playerClosestToNextServer
         if(playerClosestToNextServer && player.id === playerClosestToNextServer.id) {
             playerClosestToNextServer = undefined;
         }
+
+        if(playerClosestToBoundaries.id == player.id) {
+            playerInfo['preempt'] = true;
+        }
+
+        // DEBUG
         console.log('player moving to next server', player.id, player.y, playerClosestToNextServer, transferNextIteration);
 
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port + 1));
         transferNextIteration = false;
-    } else if (path[path.length-1].y < serverAlloc.serverMin || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
+
+    // If out of bounds and not a pre-empted player OR a pre-empted player
+    } else if ((path[path.length-1].y < serverAlloc.serverMin && !GameServer.otherPlayers.has(player.id)) || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
         if(playerClosestToPreviousServer && player.id === playerClosestToPreviousServer.id) {
             playerClosestToPreviousServer = undefined;
         }
 
+        if(playerClosestToBoundaries.id == player.id) {
+            playerInfo['preempt'] = true;
+        }
+
+        // DEBUG
         console.log('player moving to previous server', player.id, player.y, playerClosestToPreviousServer, transferNextIteration);
 
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port - 1));
+
         transferNextIteration = false;
     }
 
@@ -692,11 +705,16 @@ GameServer.pickPlayerToTransfer = function() {
         // DEBUG
         // console.log('comparison between two', playerClosestToPreviousServer, playerClosestToNextServer);
         // console.log('returned closest ', playerClosestToBoundaries);
-
-        transferNextIteration = true;
+        // } else if (playerClosestToPreviousServer && !playerClosestToNextServer) {
+        //     playerClosestToBoundaries = playerClosestToPreviousServer;
+        // } else if (!playerClosestToPreviousServer && playerClosestToNextServer) {
+        //     playerClosestToBoundaries = playerClosestToNextServer;
+        // }
 
         playerClosestToPreviousServer = undefined;
         playerClosestToNextServer = undefined;
+
+        transferNextIteration = true;
     }
 };
 
@@ -717,6 +735,7 @@ GameServer.findFurthestPlayers = function(player) {
             y: player.y
         }
     }
+
     // DEBUG
     // console.log('players closest to cut off', playerClosestToNextServer, playerClosestToPreviousServer);
 };
@@ -970,6 +989,9 @@ function deserializePlayer(socketID,obj,isRedis) {
         if (obj.hasOwnProperty(prop)) {
             if(prop == 'mongoID') {
                 GameServer.IDmap[obj.id] = obj[prop];
+            } else if(prop == 'preempt'){
+                GameServer.otherPlayers.add(obj.id);
+                // console.log(GameServer.otherPlayers);
             } else {
                 player[prop] = obj[prop];
             }
