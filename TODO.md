@@ -45,9 +45,11 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [x] Only activate the transfer to non-adjacent servers once both adjacent servers exceed their threshold.
 
-- [ ] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
+- [x] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
 
 - [x] Refactor to get list of host addresses, and the port numbers from a JSON file
+
+- [ ] Fix bug in dynamic load balancing algorithm that makes Server 2 consistently shed too much weight.
 
 ### Notes for Paper
 - [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
@@ -118,3 +120,11 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] Moving boundaries gives you an aggregate effect where too many players might end up getting sent to adjacent servers.
 
 - [ ] Already with relatively simple logic on the servers, you get high latency as the server tries to respond to a large number of players. Could be due to the fact that some languages are slower than others, which explains why games like WoW depend upon languages like Lua.
+
+- [ ] Upon transferring too many players consecutively, leads to network spikes and servers take a while to stabilize. Easier for servers to shed to adjacent servers.
+
+- [ ] Converges on a stable configuration unless changes are made to the population.
+
+- [ ] No arbitrary thresholds are set, because you want best-effort on all servers, and they should adapt.
+
+- [ ] Because the servers don't communicate with each other, multiple can reach overloaded state at the exact same time and because the Fibonacci heap batch processes requests all of the servers might end up shedding their load to the exact same server so what was previously underloaded now becomes overloaded.

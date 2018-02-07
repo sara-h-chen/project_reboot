@@ -158,6 +158,7 @@ var pushInfo = function(channel, packet) {
     infoStack.push(JSON.parse(packet));
     // DEBUG
     // console.log('packet', packet);
+
 };
 sub.on('message', pushInfo);
 sub.subscribe('master');
@@ -232,7 +233,7 @@ function sendCommand(portNumber, hostAddress) {
     udpSocket.send(new Buffer(0), 0, 0, portNumber, hostAddress, function(err) {
         if (err) throw err;
         // DEBUG
-        console.log('sending UDP message...');
+        console.log('sending UDP message to ', portNumber);
     });
 }
 
@@ -241,6 +242,8 @@ function sendCommand(portNumber, hostAddress) {
  * sends a UDP packet to the least loaded server of the adjacent
  * servers or the entire system
  */
+
+// Called upon startup
 function redistributeWorkload(fibHeap, index, callback) {
     // DEBUG
     // console.log('redistributing ====> ', fibHeap);
@@ -288,8 +291,10 @@ function redistributeWorkload(fibHeap, index, callback) {
     // console.log('target ', targetServer, ' index ', index);
 
     // Prevent sending to self
-    // TODO: Make sure you change this to NOT equal
-    if (targetServer == index) {
+    if (targetServer != index) {
+        // DEBUG
+        console.log('target server: ', targetServer, '; index: ', index);
+        console.log('fibonacci heap ', fibHeap);
         var sendToPort = serverAddresses[0][targetServer].port;
         var sendToHost = serverAddresses[0][targetServer].host;
         callback(sendToPort, sendToHost);
