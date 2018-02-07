@@ -10,19 +10,21 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [x] Rewrite bot code to have it respond to distributed system.
 
-- [ ] Improve AI behavior.
-
-- [ ] Issue events that AI can then respond to.
-
-- [ ] Fix reset on AI.
-
-- [ ] Find out why the bots are not showing up on the shards.
-
 - [x] Set all monsters to non-aggressive.
 
 - [x] Change starting location to anywhere on the map. Figure out what the checkpoints are, and create your own checkpoints elsewhere on the map.
 
+- [ ] Improve AI behavior.
+
+- [ ] Issue events that AI can then respond to.
+
+###### Low Priority Tasks
+
 - [ ] Refactor code if you have the time.
+
+- [ ] Fix reset on AI.
+
+- [ ] Find out why the bots are not showing up on the shards. ***NOTE**: May be better to deal with lag on browser.*
 
 #### System Monitoring
 - [x] Establish a Master server that receives workload information pushed periodically from each server.
@@ -41,15 +43,15 @@ We are now working on the static load balancing of the system. Each game server 
 #### Dynamic Load Balancing
 - [x] Fibonacci Heap to maintain the least-loaded server.
 
+- [x] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
+
 - [x] Monitor workload on the master server. Once you hit a threshold on any of the servers then you allocate __only__ to adjacent servers to reduce the overhead of transferring packets between the servers should the player density fall.
 
-- [x] Only activate the transfer to non-adjacent servers once both adjacent servers exceed their threshold.
-
-- [x] Master server monitors workload and may pre-empt transfers if load exceeds threshold.
+- [x] Only activate the transfer to non-adjacent servers once both adjacent servers exceed their threshold. This has been disabled.
 
 - [x] Refactor to get list of host addresses, and the port numbers from a JSON file
 
-- [ ] Fix bug in dynamic load balancing algorithm that makes Server 2 consistently shed too much weight.
+- [x] Fix bug in dynamic load balancing algorithm that makes one particular server consistently shed too much weight.
 
 ### Notes for Paper
 - [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
