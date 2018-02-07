@@ -58,6 +58,8 @@ var playerClosestToNextServer;
 var playerClosestToPreviousServer;
 var playerClosestToBoundaries;
 var transferNextIteration = false;
+var preemptDest = undefined;
+var dest;
 
 GameServer.setup = function(portNumber) {
     var key;
@@ -611,10 +613,16 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
             playerInfo['preempt'] = true;
         }
 
-        // DEBUG
-        console.log('player moving to next server', player.id, player.y, playerClosestToNextServer, transferNextIteration);
+        dest = (serverAlloc.port + 1);
+        if (preemptDest) {
+            dest = preemptDest;
+            preemptDest = undefined;
+        }
 
-        GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port + 1));
+        // DEBUG
+        console.log('player moving to next server', player.id, player.y, dest, transferNextIteration);
+
+        GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,dest);
         transferNextIteration = false;
 
     // If out of bounds and not a pre-empted player OR a pre-empted player
@@ -626,11 +634,17 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         if(playerClosestToBoundaries.id == player.id) {
             playerInfo['preempt'] = true;
         }
+        dest = (serverAlloc.port - 1);
+
+        if (preemptDest) {
+            dest = preemptDest;
+            preemptDest = undefined;
+        }
 
         // DEBUG
-        console.log('player moving to previous server', player.id, player.y, playerClosestToPreviousServer, transferNextIteration);
+        console.log('player moving to previous server', player.id, player.y, dest, transferNextIteration);
 
-        GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,(serverAlloc.port - 1));
+        GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,dest);
 
         transferNextIteration = false;
     }
@@ -665,6 +679,8 @@ GameServer.handleOutOfBounds = function(pathInfo,socketInfo,player,socket,portNu
         pathInfo: pathInfo
     };
     addStamp(transferPacket);
+    // DEBUG
+    // console.log('player sent to =====> ', portNumber);
 
     socket.emit('alloc', transferPacket);
     GameServer.removePlayer(socket.id);
@@ -696,7 +712,9 @@ GameServer.receiveTransfer = function(packet,socket) {
 };
 
 // Pre-empt transfer of player within Redis region
-GameServer.pickPlayerToTransfer = function() {
+GameServer.pickPlayerToTransfer = function(destination) {
+    preemptDest = parseInt(destination);
+
     if(playerClosestToPreviousServer && playerClosestToNextServer) {
         let topDifference = Math.abs(playerClosestToPreviousServer.y - serverAlloc.serverMin);
         let bottomDifference = Math.abs(serverAlloc.serverMax - playerClosestToNextServer.y);

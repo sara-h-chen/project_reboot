@@ -311,10 +311,10 @@ udpSocket.on('listening', function() {
 
 udpSocket.on('message', function(msg, info) {
     // DEBUG
-    console.log('Received on server side from UDP ====>', msg, info);
+    console.log('Received on server side from UDP ====>', msg.toString(), info);
     // console.log(gs.players);
     // TODO: Once chosen, offload to another server
-    gs.pickPlayerToTransfer();
+    gs.pickPlayerToTransfer(msg.toString());
 });
 // Listen for commands from Master on 127.0.0.1:6060~6064
 var listenOn = Number(server.address().port) + 10;

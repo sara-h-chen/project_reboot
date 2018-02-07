@@ -229,11 +229,12 @@ function maintainMinWorkloadServer() {
     // console.log('is zero persistent? ', zeroIsPersistent);
 }
 
-function sendCommand(portNumber, hostAddress) {
-    udpSocket.send(new Buffer(0), 0, 0, portNumber, hostAddress, function(err) {
+function sendCommand(preempt, portNumber, hostAddress) {
+    let msg = new Buffer(portNumber.toString());
+    udpSocket.send(msg, 0, msg.length, preempt, hostAddress, function(err) {
         if (err) throw err;
         // DEBUG
-        console.log('sending UDP message to ', portNumber);
+        // console.log('sending UDP message to ', preempt);
     });
 }
 
@@ -290,13 +291,15 @@ function redistributeWorkload(fibHeap, index, callback) {
     // DEBUG
     // console.log('target ', targetServer, ' index ', index);
 
+    // TODO: Ensure that the server being sent to is not overloaded
     // Prevent sending to self
     if (targetServer != index) {
         // DEBUG
-        console.log('target server: ', targetServer, '; index: ', index);
-        console.log('fibonacci heap ', fibHeap);
-        var sendToPort = serverAddresses[0][targetServer].port;
+        // console.log('target server: ', targetServer, '; index: ', index);
+        // console.log('fibonacci heap ', fibHeap);
+        var preemptedServer = serverAddresses[0][index].port;
+        var sendToPort = serverAddresses[0][targetServer].port - 10;
         var sendToHost = serverAddresses[0][targetServer].host;
-        callback(sendToPort, sendToHost);
+        callback(preemptedServer, sendToPort, sendToHost);
     }
 }

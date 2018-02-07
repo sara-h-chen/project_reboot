@@ -67,13 +67,13 @@ function createBotClient(index, callback) {
 
     BotClient.socket.on('alloc',function(packet) {
         // DEBUG
-        // console.log('received packet on bot', packet);
+        // console.log('received packet on bot', packet.portNumber);
         BotClient.socketFunctions(packet);
     });
 
     BotClient.socketFunctions = function(packet) {
         // DEBUG
-        // console.log('bot connected');
+        // console.log('bot connected and attempting to connect to ', packet.portNumber);
         BotClient.socket.disconnect();
         BotClient.socket = io.connect('http://127.0.0.1:' + packet.portNumber + '/');
 
