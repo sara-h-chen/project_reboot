@@ -24,7 +24,7 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [ ] Fix reset on AI.
 
-- [ ] Find out why the bots are not showing up on the shards. ***NOTE**: May be better to deal with lag on browser.*
+- [x] Find out why the bots are not showing up on the shards. ***NOTE**: May be better to deal with lag on browser.*
 
 #### System Monitoring
 - [x] Establish a Master server that receives workload information pushed periodically from each server.
@@ -52,6 +52,19 @@ We are now working on the static load balancing of the system. Each game server 
 - [x] Refactor to get list of host addresses, and the port numbers from a JSON file
 
 - [x] Fix bug in dynamic load balancing algorithm that makes one particular server consistently shed too much weight.
+
+#### Evaluation
+- [ ] Fix spread caused by extracting minimum from Fibonacci Heap, regardless of whether they were on adjacent servers or not.
+
+- [x] Stress one specific zone.
+
+- [ ] Stress Redis zones.
+
+- [x] Stress different zones with random allocation of AI bots.
+
+- [ ] Stress servers as AI bots wander the map and frequently switch zones.
+
+- [ ] Stress with failure of component(s).
 
 ### Notes for Paper
 - [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
@@ -130,3 +143,5 @@ We are now working on the static load balancing of the system. Each game server 
 - [ ] No arbitrary thresholds are set, because you want best-effort on all servers, and they should adapt.
 
 - [ ] Because the servers don't communicate with each other, multiple can reach overloaded state at the exact same time and because the Fibonacci heap batch processes requests all of the servers might end up shedding their load to the exact same server so what was previously underloaded now becomes overloaded.
+
+- [ ] Edge servers with no overlapping regions are more likely to be overloaded due to the fact that they can only shed to _one_ neighbouring server.

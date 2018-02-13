@@ -195,6 +195,20 @@ GameServer.readMap = function(){
     });
 };
 
+// Reload to stress the right zones
+// DEFAULT: Randomized across zones
+GameServer.reloadStartPositions = function(scenarioChoice) {
+    // 0: Redis zones
+    // 1: Within a single server
+    // TODO: Implement everything after this line
+    // 2: AI wandering
+    // 3: Stress one; implemented on gate
+    // 4: Complex bots
+    switch (scenarioChoice) {
+
+    }
+};
+
 GameServer.setUpDoors = function(){ // Set up teleports
     GameServer.doors = new spaceMap();
     for (var d = 0; d < GameServer.objects.doors.length; d++) {
@@ -450,6 +464,7 @@ GameServer.determineStartingPosition = function(){
     let maximum = minimum + 4;
 
     // Determine where a new player should appear for the first time in the game
+    // Defaults to random allocation
     var checkpoints = GameServer.objects.checkpoints;
     var startArea = checkpoints[Math.floor(Math.random() * (maximum - minimum + 1)) + minimum];
     var x = randomInt(startArea.x, (startArea.x+startArea.width));
@@ -609,7 +624,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
             playerClosestToNextServer = undefined;
         }
 
-        if(playerClosestToBoundaries.id == player.id) {
+        if(playerClosestToBoundaries && playerClosestToBoundaries.id == player.id) {
             playerInfo['preempt'] = true;
         }
 
@@ -619,19 +634,21 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
             preemptDest = undefined;
         }
 
+        // TODO: Remove the player from the set if present
+        
         // DEBUG
         console.log('player moving to next server', player.id, player.y, dest, transferNextIteration);
 
         GameServer.handleOutOfBounds(pathInfo,socketInfo,playerInfo,socket,dest);
         transferNextIteration = false;
 
-    // If out of bounds and not a pre-empted player OR a pre-empted player
+    // IF (out of bounds and not a pre-empted player) OR (a pre-empted player)
     } else if ((path[path.length-1].y < serverAlloc.serverMin && !GameServer.otherPlayers.has(player.id)) || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
         if(playerClosestToPreviousServer && player.id === playerClosestToPreviousServer.id) {
             playerClosestToPreviousServer = undefined;
         }
 
-        if(playerClosestToBoundaries.id == player.id) {
+        if(playerClosestToBoundaries && playerClosestToBoundaries.id == player.id) {
             playerInfo['preempt'] = true;
         }
         dest = (serverAlloc.port - 1);
@@ -640,6 +657,8 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
             dest = preemptDest;
             preemptDest = undefined;
         }
+
+        // TODO: Remove the player from the set if present
 
         // DEBUG
         console.log('player moving to previous server', player.id, player.y, dest, transferNextIteration);

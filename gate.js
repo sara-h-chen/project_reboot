@@ -31,6 +31,7 @@ var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var fs = require('fs');
 
+
 /*
  * 6050: Lava area at top
  * 6051: Wasteland before final lava area
@@ -39,6 +40,7 @@ var fs = require('fs');
  * 6054: Beach
  */
 var serversToChooseFrom = [6050,6051,6052,6053,6054];
+var oneServer = undefined;
 
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
@@ -53,7 +55,9 @@ app.get('/',function(req,res){
 });
 
 // Manage command line arguments
-var myArgs = require('optimist').argv;
+var myArgs = require('optimist')
+    .usage('Usage: use --oo flag to stress only one server: node gate.js [--oo]')
+    .argv;
 var mongoHost, mongoDBName;
 
 var servers = JSON.parse(fs.readFileSync(__dirname + '/assets/json/servers_alloc.json')).servers;
@@ -84,6 +88,11 @@ if(myArgs.heroku){ // --heroku flag to behave according to Heroku's specs
 }
 
 server.listen(myArgs.p || process.env.PORT || 8081,function(){ // -p flag to specify port ; the env variable is needed for Heroku
+    // Randomly choose only one server
+    if(myArgs.oo) {
+        oneServer = serversToChooseFrom[Math.floor(Math.random()*serversToChooseFrom.length)];
+    }
+
     console.log('Gate listening on '+server.address().port);
 
     mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db){
@@ -128,7 +137,12 @@ var getServerAssignment = function(data, callback) {
         // console.log('---------------- player ', doc);
         if (err) throw err;
         if (!doc) {
-            var randomAllocation = serversToChooseFrom[Math.floor(Math.random()*serversToChooseFrom.length)];
+            let randomAllocation;
+            if (!oneServer) {
+                randomAllocation = serversToChooseFrom[Math.floor(Math.random()*serversToChooseFrom.length)];
+            } else {
+                randomAllocation = oneServer;
+            }
             callback(randomAllocation);
         } else {
             var location = {
