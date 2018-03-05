@@ -1,7 +1,7 @@
 /**
  * Created by Jerome on 28-10-16.
  */
-var stressRedisZones = false // defaults to false
+var stressRedisZones = true; // defaults to false
 
 var fs = require('fs');
 var PF = require('pathfinding');
@@ -468,9 +468,20 @@ GameServer.determineStartingPosition = function() {
     // Determine where a new player should appear for the first time in the game
     // Defaults to random allocation
     if(stressRedisZones) {
-        var startArea = servers[Math.floor(Math.random() * servers.length)];
-        var x = randomInt(startArea);
-        var y = randomInt();
+        // The number of servers
+        let randomChoice = 6050 + Math.floor(Math.random() * 5);
+        console.log(servers);
+        console.log(randomChoice);
+        let startArea = servers[randomChoice.toString()];
+        let x = randomInt(15, 95);
+        console.log(startArea);
+        console.log(servers[startArea]);
+        let twoZones = [startArea['min_y'], startArea['max_y'] - 15];
+        console.log('twooooo zones', twoZones);
+        // TODO: Write your Redis zones into a JSON file on its own
+        let topy_less = twoZones[Math.floor(Math.random() * twoZones.length)];
+        let y = randomInt(topy_less, topy_less + 15);
+        return {x:x, y:y};
     } else {
         var checkpoints = GameServer.objects.checkpoints;
         var startArea = checkpoints[Math.floor(Math.random() * (maximum - minimum + 1)) + minimum];

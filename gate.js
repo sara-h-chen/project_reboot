@@ -152,7 +152,7 @@ var getServerAssignment = function(data) {
             } else {
                 randomAllocation = oneServer;
             }
-            checkIfActive(randomAllocation);
+            serverAssignment(Number(randomAllocation) - 6050);
         } else {
             var location = {
                 'x': doc.x,
@@ -177,7 +177,7 @@ var serverAssignment = function(location) {
 
 var sendAssignment = function(socket, portNumber) {
     var packet = {
-        portNumber: 6050 + portNumber
+        portNumber: 6050 + Number(portNumber)
     };
     socket.emit('alloc', packet);
 };

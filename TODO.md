@@ -4,7 +4,7 @@ Currently, the Mongo client sits on its own thread `27017`, listening for update
 
 We are now working on the static load balancing of the system. Each game server starts its own version of the world, but are not required to communicate, as they are fully responsible for the entities within their own region. They would only need to communicate during the handover.
 
-
+Start up routine: gate, servers, then master.
 
 ### To-Do List
 #### AI Behavior
