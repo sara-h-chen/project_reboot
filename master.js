@@ -259,10 +259,10 @@ io.on('connection', function(socket) {
         } else {
             let lastActiveServer = 0;
             for (let serverOffset = 1; serverOffset < 3; serverOffset++) {
-                if (serversActive[num] + serverOffset) {
-                    lastActiveServer = portNumber + serverOffset;
-                } else if (serversActive[num] - serverOffset) {
-                    lastActiveServer = portNumber - serverOffset;
+                if (serversActive[num + serverOffset]) {
+                    lastActiveServer = Number(portNumber) + serverOffset;
+                } else if (serversActive[num - serverOffset]) {
+                    lastActiveServer = Number(portNumber) - serverOffset;
                 }
             }
             socket.emit('reroute', lastActiveServer);

@@ -58,13 +58,13 @@ We are now working on the static load balancing of the system. Each game server 
 
 - [x] Stress one specific zone.
 
-- [ ] Stress Redis zones.
+- [ ] Stress Redis zones. To activate, go into `GameServer.js` and set the boolean variable to `true`.
 
 - [x] Stress different zones with random allocation of AI bots.
 
 - [ ] Stress servers as AI bots wander the map and frequently switch zones.
 
-- [ ] Stress with failure of component(s).
+- [x] Stress with failure of component(s).
 
 ### Notes for Paper
 - [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.

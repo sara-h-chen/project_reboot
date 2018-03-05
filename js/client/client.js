@@ -178,6 +178,11 @@ Client.socketFunctions = function(packet) {
     Client.socket.on('latency', function(packet) {
         Client.socket.emit('ponq', packet.stamp);
     });
+
+    // Reconnect back to Gate server upon disconnection
+    Client.socket.on('disconnect', function() {
+        Client.socket = io.connect('http://127.0.0.1:8081');
+    });
 };
 
 Client.sendPath = function(path,action,finalOrientation){

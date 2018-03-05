@@ -1,6 +1,7 @@
 /**
  * Created by Jerome on 28-10-16.
  */
+var stressRedisZones = false // defaults to false
 
 var fs = require('fs');
 var PF = require('pathfinding');
@@ -460,16 +461,21 @@ GameServer.removeFromLocation = function(entity){
 };
 
 GameServer.determineStartingPosition = function(){
-    let minimum = (serverAlloc.serverNumber % 6050) * 5;
+    let minimum = (serverAlloc.serverNumber - 6050) * 5;
     let maximum = minimum + 4;
 
     // Determine where a new player should appear for the first time in the game
     // Defaults to random allocation
-    var checkpoints = GameServer.objects.checkpoints;
-    var startArea = checkpoints[Math.floor(Math.random() * (maximum - minimum + 1)) + minimum];
-    var x = randomInt(startArea.x, (startArea.x+startArea.width));
-    var y = randomInt(startArea.y, (startArea.y+startArea.height));
-    return {x:Math.floor(x/GameServer.map.tilewidth),y:Math.floor(y/GameServer.map.tileheight)};
+    if(stressRedisZones) {
+        var x = randomInt();
+        var y = randomInt();
+    } else {
+        var checkpoints = GameServer.objects.checkpoints;
+        var startArea = checkpoints[Math.floor(Math.random() * (maximum - minimum + 1)) + minimum];
+        var x = randomInt(startArea.x, (startArea.x+startArea.width));
+        var y = randomInt(startArea.y, (startArea.y+startArea.height));
+        return {x:Math.floor(x/GameServer.map.tilewidth),y:Math.floor(y/GameServer.map.tileheight)};
+    }
 };
 
 GameServer.computeTileCoords = function(x,y){ // Convert pixel coordinates to tile coordinates

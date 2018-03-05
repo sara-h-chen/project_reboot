@@ -152,7 +152,7 @@ var getServerAssignment = function(data) {
             } else {
                 randomAllocation = oneServer;
             }
-            callback(randomAllocation);
+            checkIfActive(randomAllocation);
         } else {
             var location = {
                 'x': doc.x,
