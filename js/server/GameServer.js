@@ -196,6 +196,7 @@ GameServer.readMap = function(){
     });
 };
 
+// TODO: Complete this
 // Reload to stress the right zones
 // DEFAULT: Randomized across zones
 GameServer.reloadStartPositions = function(scenarioChoice) {
@@ -460,14 +461,15 @@ GameServer.removeFromLocation = function(entity){
     GameServer.AOIfromTiles.getFirst(entity.x,entity.y).deleteEntity(entity);
 };
 
-GameServer.determineStartingPosition = function(){
+GameServer.determineStartingPosition = function() {
     let minimum = (serverAlloc.serverNumber - 6050) * 5;
     let maximum = minimum + 4;
 
     // Determine where a new player should appear for the first time in the game
     // Defaults to random allocation
     if(stressRedisZones) {
-        var x = randomInt();
+        var startArea = servers[Math.floor(Math.random() * servers.length)];
+        var x = randomInt(startArea);
         var y = randomInt();
     } else {
         var checkpoints = GameServer.objects.checkpoints;

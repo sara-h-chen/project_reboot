@@ -177,7 +177,7 @@ var serverAssignment = function(location) {
 
 var sendAssignment = function(socket, portNumber) {
     var packet = {
-        portNumber: portNumber
+        portNumber: 6050 + portNumber
     };
     socket.emit('alloc', packet);
 };
