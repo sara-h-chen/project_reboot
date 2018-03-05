@@ -8,6 +8,14 @@ var fs = require('fs');
 
 const dgram = require('dgram');
 var udpSocket = dgram.createSocket('udp4');
+var listenFromServers = dgram.createSocket('udp4');
+
+// ========================= ATTACH SOCKET TO GATE
+var portOffset = 6050;
+const io = require('socket.io')(server, {
+    serveClient: false,
+    cookie: false
+});
 
 var pusage = require('pidusage');
 var redis = require('redis');
@@ -163,6 +171,7 @@ var pushInfo = function(channel, packet) {
 sub.on('message', pushInfo);
 sub.subscribe('master');
 
+
 function processUsage(callback) {
     pusage.stat(process.pid, function(err, stat) {
         benchmark['machine'] = server.address().port;
@@ -238,12 +247,64 @@ function sendCommand(preempt, portNumber, hostAddress) {
     });
 }
 
+
+// =============== CHECK FOR ACTIVE SERVERS
+io.on('connection', function(socket) {
+    console.log('Gate has connected with ' + socket.id);
+
+    socket.on('check', function(portNumber) {
+        let num = Number(portNumber) - portOffset;
+        if(serversActive[num]){
+            socket.emit('ready');
+        } else {
+            let lastActiveServer = 0;
+            for (let serverOffset = 1; serverOffset < 3; serverOffset++) {
+                if (serversActive[num] + serverOffset) {
+                    lastActiveServer = portNumber + serverOffset;
+                } else if (serversActive[num] - serverOffset) {
+                    lastActiveServer = portNumber - serverOffset;
+                }
+            }
+            socket.emit('reroute', lastActiveServer);
+        }
+    });
+
+    socket.on('disconnect', function() {
+        console.log('Gate has disconnected from the Master server.')
+    });
+});
+
+listenFromServers.on('listening', function() {
+    console.log('Listening for activity from backend.')
+});
+listenFromServers.on('message', function(msg) {
+    console.log('received message from newly active server: ', Number(msg));
+    switch (Number(msg)) {
+        case 6050:
+            serversActive[0] = true;
+            break;
+        case 6051:
+            serversActive[1] = true;
+            break;
+        case 6052:
+            serversActive[2] = true;
+            break;
+        case 6053:
+            serversActive[3] = true;
+            break;
+        case 6054:
+            serversActive[4] = true;
+            break;
+    }
+});
+listenFromServers.bind(8300);
+
+
 /*
  * Called when workload on server exceeds its threshold;
  * sends a UDP packet to the least loaded server of the adjacent
  * servers or the entire system
  */
-
 // Called upon startup
 function redistributeWorkload(fibHeap, index, callback) {
     // DEBUG

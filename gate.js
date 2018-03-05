@@ -30,7 +30,7 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var mongo = require('mongodb').MongoClient;
 var fs = require('fs');
-
+var comms = require('socket.io-client').connect('http://127.0.0.1:8000');
 
 /*
  * 6050: Lava area at top
@@ -41,6 +41,7 @@ var fs = require('fs');
  */
 var serversToChooseFrom = [6050,6051,6052,6053,6054];
 var oneServer = undefined;
+var servAssignment = 0;
 
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
@@ -118,10 +119,10 @@ io.on('connection',function(socket){
     });
 
     socket.on('init-world', function(data) {
-        var callback = function(portNumber) {
-            sendAssignment(socket, portNumber);
-        };
-        getServerAssignment(data, callback);
+        // var callback = function(portNumber) {
+        //     sendAssignment(socket, portNumber);
+        // };
+        getServerAssignment(data);
     });
 
     socket.on('disconnect',function(){
@@ -129,9 +130,17 @@ io.on('connection',function(socket){
         console.log('Disconnection with ID '+socket.id);
     });
 
+    // =============== IN CASE OF COMPONENT FAILURE
+    comms.on('ready', function() {
+        sendAssignment(socket, servAssignment);
+    });
+
+    comms.on('reroute', function(data) {
+        sendAssignment(socket, data);
+    });
 });
 
-var getServerAssignment = function(data, callback) {
+var getServerAssignment = function(data) {
     server.db.collection('players').findOne({_id: new ObjectId(data.id)}, function(err, doc) {
         // DEBUG
         // console.log('---------------- player ', doc);
@@ -149,8 +158,7 @@ var getServerAssignment = function(data, callback) {
                 'x': doc.x,
                 'y': doc.y
             };
-            var port = serverAssignment(location);
-            callback(port);
+            serverAssignment(location);
         }
     });
 };
@@ -163,7 +171,8 @@ var serverAssignment = function(location) {
             }
         }
     }
-    return key;
+    servAssignment = key;
+    checkIfActive(key);
 };
 
 var sendAssignment = function(socket, portNumber) {
@@ -171,4 +180,8 @@ var sendAssignment = function(socket, portNumber) {
         portNumber: portNumber
     };
     socket.emit('alloc', packet);
+};
+
+var checkIfActive = function(portNumber) {
+    comms.emit('check', portNumber);
 };

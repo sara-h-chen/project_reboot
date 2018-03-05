@@ -44,6 +44,7 @@ var pub = redis.createClient();
 // Listen for commands from master server
 const dgram = require('dgram');
 var udpSocket = dgram.createSocket('udp4');
+var toMasterSocket = dgram.createSocket('udp4');
 
 var gs = require('./js/server/GameServer.js').GameServer;
 // For the binary protocol of update packets :
@@ -106,6 +107,11 @@ server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to spe
         if(err) throw(err);
         server.db = db;
         console.log('Connection to db established');
+    });
+
+    let msg = new Buffer(server.address().port.toString());
+    toMasterSocket.send(msg, 0, msg.length, 8300, function(err) {
+        if (err) throw err;
     });
 });
 

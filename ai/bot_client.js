@@ -1,6 +1,5 @@
 var io = require('socket.io-client');
 
-// TODO: Figure out why other players don't show up
 // TODO: Change this so it doesn't require the default exports to be added in these files
 // TODO: Figure out why Decoder needs the extra import for CoDec
 var CoDec = require('./CoDec.js').default;
