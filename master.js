@@ -137,6 +137,13 @@ app.get('/load', function(req,res) {
         // TODO: Test workload evaluation function
     }
 
+    let timeString = "Time: " + ms2Time(Date.now()) + "\n";
+    let stackString = "";
+    for (let i = 0; i < sendStack.length; i++) {
+        stackString = stackString + JSON.stringify(sendStack[i]) + "\n";
+    }
+    fs.appendFileSync("./logs/data.txt", timeString + stackString);
+
     var callback = function() {
         sendStack.push(benchmark);
         res.send(JSON.stringify(sendStack));
@@ -363,4 +370,15 @@ function redistributeWorkload(fibHeap, index, callback) {
         var sendToHost = serverAddresses[0][targetServer].host;
         callback(preemptedServer, sendToPort, sendToHost);
     }
+}
+
+function ms2Time(ms) {
+    var secs = ms / 1000;
+    ms = Math.floor(ms % 1000);
+    var minutes = secs / 60;
+    secs = Math.floor(secs % 60);
+    var hours = minutes / 60;
+    minutes = Math.floor(minutes % 60);
+    hours = Math.floor(hours % 24);
+    return hours + ":" + minutes + ":" + secs + "." + ms;
 }

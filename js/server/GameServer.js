@@ -1,7 +1,7 @@
 /**
  * Created by Jerome on 28-10-16.
  */
-var stressRedisZones = true; // defaults to false
+var stressRedisZones = false; // defaults to false
 
 var fs = require('fs');
 var PF = require('pathfinding');

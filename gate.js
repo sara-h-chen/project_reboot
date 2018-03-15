@@ -132,10 +132,12 @@ io.on('connection',function(socket){
 
     // =============== IN CASE OF COMPONENT FAILURE
     comms.on('ready', function() {
+        console.log('ready', servAssignment);
         sendAssignment(socket, servAssignment);
     });
 
     comms.on('reroute', function(data) {
+        console.log('rerouted', data);
         sendAssignment(socket, data);
     });
 });
