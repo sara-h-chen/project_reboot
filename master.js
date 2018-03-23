@@ -260,15 +260,16 @@ io.on('connection', function(socket) {
     console.log('Gate has connected with ' + socket.id);
 
     socket.on('check', function(portNumber) {
-        let num = Number(portNumber) - portOffset;
+        let num = Number(portNumber);
+        console.log(portNumber, serversActive, num, serversActive[num]);
         if(serversActive[num]){
-            socket.emit('ready');
+            socket.emit('ready', num);
         } else {
             let lastActiveServer = 0;
             for (let serverOffset = 1; serverOffset < 3; serverOffset++) {
-                if (serversActive[num + serverOffset]) {
+                if (serversActive[num]) {
                     lastActiveServer = Number(portNumber) + serverOffset;
-                } else if (serversActive[num - serverOffset]) {
+                } else if (serversActive[num]) {
                     lastActiveServer = Number(portNumber) - serverOffset;
                 }
             }

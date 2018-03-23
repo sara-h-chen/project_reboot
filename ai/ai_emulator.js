@@ -9,6 +9,10 @@ var collisionArray = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 easystar.setGrid(collisionArray);
 easystar.setAcceptableTiles([0]);
 
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 function doBotStuff(player, index, cycle = 0) {
     // TODO: Write a load model
     start = {};

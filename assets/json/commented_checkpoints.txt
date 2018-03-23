@@ -276,12 +276,13 @@
     y: 8800 }
 ]
 
-Grassland
-23, 155 height x3 width x3
-54, 158 height x2 width x3
-57, 169 height x3 width x3
-72, 169 height x2 width x2
-31, 171 height x4 width x2
+
+Lavaland
+28, 42 height x3 width x3
+20, 22 height x3 width x3
+87, 14 height x3 width x3
+100, 10 height x2 width x2
+52, 24 height x2 width x2
 
 Wasteland
 46, 60 height x2 width x3
@@ -291,12 +292,12 @@ Wasteland
 26, 132 height x2 width x3
 64, 134 height x2 width x3
 
-Lavaland
-28, 42 height x3 width x3
-20, 22 height x3 width x3
-87, 14 height x3 width x3
-100, 10 height x2 width x2
-52, 24 height x2 width x2
+Grassland
+23, 155 height x3 width x3
+54, 158 height x2 width x3
+57, 169 height x3 width x3
+72, 169 height x2 width x2
+31, 171 height x4 width x2
 
 Beach
 52, 264 height x4 width x4

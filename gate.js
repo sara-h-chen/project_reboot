@@ -122,7 +122,7 @@ io.on('connection',function(socket){
         // var callback = function(portNumber) {
         //     sendAssignment(socket, portNumber);
         // };
-        getServerAssignment(data);
+        getServerAssignment(socket, data);
     });
 
     socket.on('disconnect',function(){
@@ -131,6 +131,7 @@ io.on('connection',function(socket){
     });
 
     // =============== IN CASE OF COMPONENT FAILURE
+    //
     comms.on('ready', function() {
         console.log('ready', servAssignment);
         sendAssignment(socket, servAssignment);
@@ -142,7 +143,7 @@ io.on('connection',function(socket){
     });
 });
 
-var getServerAssignment = function(data) {
+var getServerAssignment = function(socket, data) {
     server.db.collection('players').findOne({_id: new ObjectId(data.id)}, function(err, doc) {
         // DEBUG
         // console.log('---------------- player ', doc);
@@ -151,30 +152,36 @@ var getServerAssignment = function(data) {
             let randomAllocation;
             if (!oneServer) {
                 randomAllocation = serversToChooseFrom[Math.floor(Math.random()*serversToChooseFrom.length)];
+                console.log('random ---->>', randomAllocation);
             } else {
                 randomAllocation = oneServer;
             }
-            serverAssignment(Number(randomAllocation) - 6050);
+            serverAssignment(socket, Number(randomAllocation) - 6050);
         } else {
             var location = {
                 'x': doc.x,
                 'y': doc.y
             };
-            serverAssignment(location);
+            serverAssignment(socket, location);
         }
     });
 };
 
-var serverAssignment = function(location) {
-    for (var key in servers) {
-        if (servers.hasOwnProperty(key)) {
-            if (servers[key].max_y > location.y) {
-                break;
+var serverAssignment = function(socket, location) {
+    if(location.y) {
+        for (var key in servers) {
+            if (servers.hasOwnProperty(key)) {
+                if (servers[key].max_y > location.y) {
+                    break;
+                }
             }
         }
+        servAssignment = Number(key) - 6050;
+    } else {
+        servAssignment = location;
     }
-    servAssignment = key;
-    checkIfActive(key);
+    // checkIfActive(servAssignment);
+    sendAssignment(socket, servAssignment);
 };
 
 var sendAssignment = function(socket, portNumber) {

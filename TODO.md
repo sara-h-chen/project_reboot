@@ -62,20 +62,22 @@ Start up routine: gate, servers, then master.
 
 - [ ] Stress Redis zones. To activate, go into `GameServer.js` and set the boolean variable to `true`.
 
-- [x] Stress different zones with random allocation of AI bots.
+- [ ] Stress different zones with random allocation of AI bots.
 
 - [ ] Stress servers as AI bots wander the map and frequently switch zones.
 
-- [x] Stress with failure of component(s).
+- [ ] Stress with failure of component(s).
+
+- [ ] Compare random allocation on dynamic with static load balancing.
 
 ### Notes for Paper
-- [ ] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
+- [x] Callbacks and asynchronity; internal scheduling and optimization by JavaScript.
 
 - [ ] Porting single-server applications to multi-server architectures. Difficulties faced due to code dependencies.
 
-- [ ] Lack of documentation for frameworks.
+- [x] Lack of documentation for frameworks.
 
-- [ ] Redis; used as an MQ in Publish/Subscribe design pattern.
+- [x] Redis; used as an MQ in Publish/Subscribe design pattern.
 
 - [ ] Due to initializing the entire world at startup time, discrepancy between client and server, unless client reloads. Use of portals, separate instances and loading screens in industry, as players get transferred from one server to another.
 
@@ -87,15 +89,15 @@ Start up routine: gate, servers, then master.
 
 - [ ] Large lag during transfer if not loaded in advance
 
-- [ ] Redis is used to cache the data temporarily as it transfers between servers, as a centralized datastore. The system does little to offer anything other than Persistence, according to CAP's Theorem, because it either rolls back or completes the transaction.
+- [x] Redis is used to cache the data temporarily as it transfers between servers, as a centralized datastore. The system does little to offer anything other than Persistence, according to CAP's Theorem, because it either rolls back or completes the transaction.
 
 - [ ] Fibonacci Analysis: Put first thing that `isActive` into heap. Use individual variables to then store the current workload of each server. If the workload increases then delete the node and re-insert the new workload O(logn). If decreases then decrease-key O(1). [Reference.](http://mathjs.org/docs/reference/classes/fibonacciheap.html)
 
-- [ ] Latency and CPU/thread usage differs, depending on hardware. On worse hardware, latency is higher and CPU usage is higher (tested on Dell Inspiron 14 3000 2.2GHz i5, 4GB RAM, 500GB HDD and MacBook Pro 2.3GHz Kaby Lake i5 dual-core processor, 8GB RAM, 256GB SSD storage).
+- [x] Latency and CPU/thread usage differs, depending on hardware. On worse hardware, latency is higher and CPU usage is higher (tested on Dell Inspiron 14 3000 2.2GHz i5, 4GB RAM, 500GB HDD and MacBook Pro 2.3GHz Kaby Lake i5 dual-core processor, 8GB RAM, 256GB SSD storage).
 
-- [ ] The more  you use the `decreaseKey` operation, the more effective the Fib Heap becomes.
+- [x] The more  you use the `decreaseKey` operation, the more effective the Fib Heap becomes.
 
-- [ ] The nature of JavaScript and the asynchronity of socket communications gives rise to race conditions, which may be architecture dependent.
+- [x] The nature of JavaScript and the asynchronity of socket communications gives rise to race conditions, which may be architecture dependent.
 
 - [ ] Choosing the right threshold is non-trivial.
 
@@ -105,7 +107,7 @@ Start up routine: gate, servers, then master.
 
 - [ ] There are challenges with transferring players in non-continuous regions, like the edges of the map, where there is only one adjacent server.
 
-- [ ] Shift things onto the master server, to reduce computation on the other servers.
+- [x] Shift things onto the master server, to reduce computation on the other servers.
 
 - [ ] Problems with resolving different IP addresses. IPv6 and IPv4 are non-compatible, and sending from one machine to another requires that they be of the same protocol, or steps have to be taken to make them compatible. For example:
 
