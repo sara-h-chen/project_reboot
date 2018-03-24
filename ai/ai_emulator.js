@@ -9,23 +9,36 @@ var collisionArray = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 easystar.setGrid(collisionArray);
 easystar.setAcceptableTiles([0]);
 
-function sleep (time) {
+//===================== HELPER FUNCTIONS =========================
+function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
+function randomInt(low, high) {
+    return Math.floor(Math.random() * (high - low) + low);
+}
+
+
+//====================== BOT FUNCTIONS ==========================
 function doBotStuff(player, index, cycle = 0) {
     // TODO: Write a load model
     start = {};
     start.x = player.x;
     start.y = player.y;
     step = 3;
+    // if even cycle (0/2): move left/right
     var dx = cycle % 2 == 0 ? cycle % 4 == 0 ? step : -step : 0;
+    // if odd cycle (1/3): move up/down
     var dy = cycle % 2 == 1 ? cycle % 4 == 1 ? step : -step : 0;
     var delta = {x: dx, y: dy};
     pathfindingCallback = (path) => {if (path) BotClients[index].sendPath(path, {action: 0}, 0)};
     easystar.findPath(start.x, start.y, start.x + delta.x, start.y + delta.y, pathfindingCallback);
     easystar.calculate();
     setTimeout(() => doBotStuff({x: player.x + delta.x, y: player.y + delta.y}, index, (cycle + 1) % 4), 1000);
+}
+
+function wander(player, index, cycle=0) {
+
 }
 
 totalBots = 50;

@@ -56,13 +56,13 @@ Start up routine: gate, servers, then master.
 - [x] Fix bug in dynamic load balancing algorithm that makes one particular server consistently shed too much weight.
 
 #### Evaluation
-- [ ] Fix spread caused by extracting minimum from Fibonacci Heap, regardless of whether they were on adjacent servers or not.
+- [x] Fix spread caused by extracting minimum from Fibonacci Heap, regardless of whether they were on adjacent servers or not.
 
-- [x] Stress one specific zone.
+- [x] Stress one specific zone. Use the `-oo` flag on command line when starting the gate to activate.
 
-- [ ] Stress Redis zones. To activate, go into `GameServer.js` and set the boolean variable to `true`.
+- [x] Stress Redis zones. To activate, go into `GameServer.js` and set the boolean variable to `true`.
 
-- [ ] Stress different zones with random allocation of AI bots.
+- [x] Stress different zones with random allocation of AI bots.
 
 - [ ] Stress servers as AI bots wander the map and frequently switch zones.
 
