@@ -66,7 +66,7 @@ Start up routine: gate, servers, then master.
 
 - [ ] Stress servers as AI bots wander the map and frequently switch zones.
 
-- [ ] Stress with failure of component(s).
+- [x] Stress with failure of component(s).
 
 - [ ] Compare random allocation on dynamic with static load balancing.
 

@@ -99,8 +99,8 @@ if(myArgs.heroku){ // --heroku flag to behave according to Heroku's specs
 server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to specify port ; the env variable is needed for Heroku
     console.log('Listening on '+server.address().port);
     server.clientUpdateRate = 1000/5; // Rate at which update packets are sent
-    gs.setup(server.address().port);
     gs.readMap();
+    gs.setup(server.address().port);
     server.setUpdateLoop();
 
     mongo.connect('mongodb://'+mongoHost+'/'+mongoDBName,function(err,db){

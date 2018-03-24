@@ -137,12 +137,13 @@ app.get('/load', function(req,res) {
         // TODO: Test workload evaluation function
     }
 
-    let timeString = "Time: " + ms2Time(Date.now()) + "\n";
-    let stackString = "";
-    for (let i = 0; i < sendStack.length; i++) {
-        stackString = stackString + JSON.stringify(sendStack[i]) + "\n";
-    }
-    fs.appendFileSync("./logs/data.txt", timeString + stackString);
+    // LOG
+    // let timeString = "Time: " + ms2Time(Date.now()) + "\n";
+    // let stackString = "";
+    // for (let i = 0; i < sendStack.length; i++) {
+    //     stackString = stackString + JSON.stringify(sendStack[i]) + "\n";
+    // }
+    // fs.appendFileSync("./logs/data.txt", timeString + stackString);
 
     var callback = function() {
         sendStack.push(benchmark);
@@ -259,9 +260,12 @@ function sendCommand(preempt, portNumber, hostAddress) {
 io.on('connection', function(socket) {
     console.log('Gate has connected with ' + socket.id);
 
+    // REMOVED: Race condition
     socket.on('check', function(portNumber) {
         let num = Number(portNumber);
-        console.log(portNumber, serversActive, num, serversActive[num]);
+        // DEBUG
+        // console.log(portNumber, serversActive, num, serversActive[num]);
+        // A race condition exists here
         if(serversActive[num]){
             socket.emit('ready', num);
         } else {

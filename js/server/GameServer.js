@@ -1,7 +1,7 @@
 /**
  * Created by Jerome on 28-10-16.
  */
-var stressRedisZones = false; // defaults to false
+var stressRedisZones = true; // defaults to false
 
 var fs = require('fs');
 var PF = require('pathfinding');
@@ -79,6 +79,15 @@ GameServer.setup = function(portNumber) {
         }
     }
 };
+
+GameServer.readRedisPoints = function() {
+    fs.readFile('./assets/json/redis_checkpoints.json', 'utf8', function (err, data) {
+        if (err) throw err;
+        let points = JSON.parse(data);
+        GameServer.objects.checkpoints = points.objects;
+    });
+};
+
 
 // A few helper functions
 GameServer.addPlayerID = function(socketID,playerID){ // map a socket id to a player id
@@ -191,6 +200,11 @@ GameServer.readMap = function(){
         GameServer.setUpChests();
         GameServer.setUpRoaming();
         GameServer.setLoops();
+
+        if(stressRedisZones) {
+            GameServer.readRedisPoints();
+        }
+
         console.log('Map read');
         GameServer.mapReady = true;
     });
@@ -467,28 +481,12 @@ GameServer.determineStartingPosition = function() {
 
     // Determine where a new player should appear for the first time in the game
     // Defaults to random allocation
-    if(stressRedisZones) {
-        // The number of servers
-        let randomChoice = 6050 + Math.floor(Math.random() * 5);
-        console.log(servers);
-        console.log(randomChoice);
-        let startArea = servers[randomChoice.toString()];
-        let x = randomInt(15, 95);
-        console.log(startArea);
-        console.log(servers[startArea]);
-        let twoZones = [startArea['min_y'], startArea['max_y'] - 15];
-        console.log('twooooo zones', twoZones);
-        // TODO: Write your Redis zones into a JSON file on its own
-        let topy_less = twoZones[Math.floor(Math.random() * twoZones.length)];
-        let y = randomInt(topy_less, topy_less + 15);
-        return {x:x, y:y};
-    } else {
-        var checkpoints = GameServer.objects.checkpoints;
-        var startArea = checkpoints[Math.floor(Math.random() * (maximum - minimum + 1)) + minimum];
-        var x = randomInt(startArea.x, (startArea.x+startArea.width));
-        var y = randomInt(startArea.y, (startArea.y+startArea.height));
-        return {x:Math.floor(x/GameServer.map.tilewidth),y:Math.floor(y/GameServer.map.tileheight)};
-    }
+    var checkpoints = GameServer.objects.checkpoints;
+    var startArea = checkpoints[Math.floor(Math.random() * (maximum - minimum + 1)) + minimum];
+    var x = randomInt(startArea.x, (startArea.x+startArea.width));
+    var y = randomInt(startArea.y, (startArea.y+startArea.height));
+    return {x:Math.floor(x/GameServer.map.tilewidth),y:Math.floor(y/GameServer.map.tileheight)};
+
 };
 
 GameServer.computeTileCoords = function(x,y){ // Convert pixel coordinates to tile coordinates

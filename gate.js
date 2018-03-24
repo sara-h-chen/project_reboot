@@ -180,6 +180,7 @@ var serverAssignment = function(socket, location) {
     } else {
         servAssignment = location;
     }
+    // Removed because of race condition
     // checkIfActive(servAssignment);
     sendAssignment(socket, servAssignment);
 };
