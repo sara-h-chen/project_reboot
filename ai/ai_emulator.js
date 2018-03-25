@@ -1,6 +1,7 @@
 createBotClient = require('./bot_client.js').createBotClient;
+var viewer = require('./assets/index.js');
 
-var questWaypoints = [{"x":100,"y":9},{"x":18,"y":67},{"x":12,"y":95},{"x":20,"y":119},{"x":76,"y":138},{"x":66,"y":160},{"x":19,"y":209},{"x":63,"y":204},{"x":75,"y":223},{"x":12,"y":237},{"x":76,"y":294},{"x":73,"y":268}];
+const questWaypoints = [{"x":100,"y":9},{"x":18,"y":67},{"x":12,"y":95},{"x":20,"y":119},{"x":76,"y":138},{"x":66,"y":160},{"x":19,"y":209},{"x":63,"y":204},{"x":75,"y":223},{"x":12,"y":237},{"x":76,"y":294},{"x":73,"y":268}];
 
 // TODO: Change this so it doesn't require the default exports to be added in these files
 var EasyStar = require('./easystar.min.js').default;
@@ -40,7 +41,7 @@ function doBotStuff(player, index, cycle = 0) {
     pathfindingCallback = (path) => {if (path) BotClients[index].sendPath(path, {action: 0}, 0)};
     easystar.findPath(start.x, start.y, start.x + delta.x, start.y + delta.y, pathfindingCallback);
     easystar.calculate();
-    setTimeout(() => doBotStuff({x: player.x + delta.x, y: player.y + delta.y}, index, (cycle + 1) % 4), 1000);
+    setTimeout(() => doBotStuff({x: player.x + delta.x, y: player.y + delta.y}, index, (cycle + 1) % 4), 1500);
 }
 
 function wander(player, index) {
@@ -67,12 +68,12 @@ function wander(player, index) {
             let dequeued = queue.shift();
             BotClients[index].sendPath(dequeued, {action: 0}, 0);
             lastPathCell = dequeued[dequeued.length - 1];
-        } else if (path && path.length < 40) {
+        } else if (path && path.length < 30) {
             BotClients[index].sendPath(path, {action: 0}, 0);
             lastPathCell = path[path.length - 1];
             // if path to quest waypoint is too long, break into chunks
         } else {
-            let i,j, chunk = 20;
+            let i,j, chunk = 5;
             for (i = 0, j = path.length; i < j; i += chunk) {
                 queue.push(path.slice(i, i + chunk));
             }
@@ -86,12 +87,13 @@ function wander(player, index) {
     setTimeout(() => wander({x:lastPathCell.x, y: lastPathCell.y, timeOfNextChoice: timeOfNextChoice, queue: queue, waypoint: chosenRandomWaypoint}, index), 3000);
 }
 
-totalBots = 1;
+totalBots = 50;
 var BotClients = [];
 for (var i = 0; i < totalBots; i++) {
     // BotClients.push(createBotClient(i, doBotStuff));
     BotClients.push(createBotClient(i, wander));
     BotClients[i].requestData();
+
 }
 
 // var repl = require("repl");
