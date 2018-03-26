@@ -3,9 +3,11 @@ var bug2;
 var bug3;
 var bug4;
 
+var bg;
+
 function setup() {
     bg = loadImage("assets/browserquestworldmap_rotated.jpeg");
-    createCanvas(386, 1024);
+    createCanvas(271, 720);
     // Create object
     bug1 = new Jitter();
     bug2 = new Jitter();
@@ -27,6 +29,7 @@ function draw() {
 
 // Jitter class
 function Jitter() {
+
     this.x = random(width);
     this.y = random(height);
     this.diameter = random(10, 30);
