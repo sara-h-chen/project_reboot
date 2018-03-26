@@ -12,6 +12,7 @@ const easystar = new EasyStar.js();
 const questWaypoints = [{"x":100,"y":9},{"x":18,"y":67},{"x":12,"y":95},{"x":20,"y":119},{"x":76,"y":138},{"x":66,"y":160},{"x":19,"y":209},{"x":63,"y":204},{"x":75,"y":223},{"x":12,"y":237},{"x":76,"y":294},{"x":73,"y":268}];
 
 let pathQueue = [];
+var BotClients = [];
 
 app.use('/assets', express.static(__dirname + '/assets/'));
 
@@ -20,9 +21,12 @@ app.get('/', function(req, res) {
 });
 
 app.get('/load', function(req, res) {
-    console.log('entered');
     res.send(JSON.stringify(pathQueue));
     pathQueue.splice(0, pathQueue.length);
+});
+
+app.get('/setup', function(req, res) {
+    res.send(JSON.stringify(BotClients.length));
 });
 
 server.listen(8075, function() {
@@ -91,11 +95,11 @@ function wander(player, index) {
             let dequeued = queue.shift();
             BotClients[index].sendPath(dequeued, {action: 0}, 0);
             lastPathCell = dequeued[dequeued.length - 1];
-            // pathQueue.push({index: index, path: dequeued});
+            pathQueue[index] = dequeued;
         } else if (path.length > 0 && path.length < 30) {
             BotClients[index].sendPath(path, {action: 0}, 0);
             lastPathCell = path[path.length - 1];
-            // pathQueue.push({index: index, path: path});
+            pathQueue[index] = path;
         // if path to quest waypoint is too long, break into chunks
         } else if (path.length > 0) {
             let i,j, chunk = 5;
@@ -105,22 +109,19 @@ function wander(player, index) {
             let dequeued = queue.shift();
             BotClients[index].sendPath(dequeued, {action: 0}, 0);
             lastPathCell = dequeued[dequeued.length - 1];
-            // pathQueue.push({index: index, path: dequeued});
+            pathQueue[index] = dequeued;
         } else if (path.length == 0) {
             lastPathCell = {x: chosenRandomWaypoint.x, y: chosenRandomWaypoint.y};
         }
     };
-    console.log('positions: ', start.x, start.y, chosenRandomWaypoint.x, chosenRandomWaypoint.y);
     easystar.findPath(start.x, start.y, chosenRandomWaypoint.x, chosenRandomWaypoint.y, pathfindingCallback);
     easystar.calculate();
     setTimeout(() => wander({x:lastPathCell.x, y: lastPathCell.y, timeOfNextChoice: timeOfNextChoice, queue: queue, waypoint: chosenRandomWaypoint}, index), 3000);
 }
 
 totalBots = 50;
-var BotClients = [];
 for (var i = 0; i < totalBots; i++) {
     // BotClients.push(createBotClient(i, doBotStuff));
     BotClients.push(createBotClient(i, wander));
     BotClients[i].requestData();
-
 }

@@ -1,43 +1,46 @@
-var bug1;  // Declare objects
-var bug2;
-var bug3;
-var bug4;
-
 var bg;
+var pathList = [];
+let botList = [];
 
 function setup() {
     bg = loadImage("assets/browserquestworldmap_rotated.jpeg");
     createCanvas(271, 720);
-    // Create object
-    bug1 = new Jitter();
-    bug2 = new Jitter();
-    bug3 = new Jitter();
-    bug4 = new Jitter();
+
+    $.ajax({
+        url: "setup"
+    }).then(function(res) {
+        for (let i=0; i < Number(res); i++) {
+            botList[i] = new Jitter();
+        }
+    });
+    frameRate(1);
 }
 
 function draw() {
+
     background(bg);
-    bug1.move();
-    bug1.display();
-    bug2.move();
-    bug2.display();
-    bug3.move();
-    bug3.display();
-    bug4.move();
-    bug4.display();
+
+    for (let i=0; i < pathList.length; i++) {
+        let move;
+        if (pathList[i]) {
+            move = pathList[i].shift();
+        }
+        if (move) {
+            botList[i].setLocation((move.x / 114) * 271, (move.y / 300) * 720);
+        }
+        botList[i].display();
+    }
 }
 
 // Jitter class
 function Jitter() {
+    this.x = 0;
+    this.y = 0;
+    this.diameter = 15;
 
-    this.x = random(width);
-    this.y = random(height);
-    this.diameter = random(10, 30);
-    this.speed = 1;
-
-    this.move = function() {
-        this.x += random(-this.speed, this.speed);
-        this.y += random(-this.speed, this.speed);
+    this.setLocation = function(x, y) {
+        this.x = x;
+        this.y = y;
     };
 
     this.display = function() {
