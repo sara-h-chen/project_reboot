@@ -3,8 +3,8 @@ var pathList = [];
 let botList = [];
 
 function setup() {
-    bg = loadImage("assets/browserquestworldmap_rotated.jpeg");
-    createCanvas(271, 720);
+    bg = loadImage("assets/phaserquest_map.bmp");
+    createCanvas(315, 800);
 
     $.ajax({
         url: "setup"
@@ -26,7 +26,7 @@ function draw() {
             move = pathList[i].shift();
         }
         if (move) {
-            botList[i].setLocation((move.x / 114) * 271, (move.y / 300) * 720);
+            botList[i].setLocation((move.x / 114) * 315, (move.y / 300) * 800);
         }
         botList[i].display();
     }
