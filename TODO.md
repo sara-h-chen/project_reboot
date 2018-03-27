@@ -4,7 +4,7 @@ Currently, the Mongo client sits on its own thread `27017`, listening for update
 
 We are now working on the static load balancing of the system. Each game server starts its own version of the world, but are not required to communicate, as they are fully responsible for the entities within their own region. They would only need to communicate during the handover.
 
-Start up routine: gate, servers, then master.
+Start up routine:  master, servers, then gate.
 
 ### To-Do List
 #### AI Behavior
@@ -16,9 +16,9 @@ Start up routine: gate, servers, then master.
 
 - [x] Change starting location to anywhere on the map. Figure out what the checkpoints are, and create your own checkpoints elsewhere on the map.
 
-- [ ] Improve AI behavior.
+- [x] Improve AI behavior.
 
-- [ ] Issue events that AI can then respond to.
+- [x] Issue events that AI can then respond to.
 
 ###### Low Priority Tasks
 

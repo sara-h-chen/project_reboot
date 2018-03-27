@@ -109,10 +109,7 @@ server.listen(myArgs.p || process.env.PORT || 6053,function(){ // -p flag to spe
         console.log('Connection to db established');
     });
 
-    let msg = new Buffer(server.address().port.toString());
-    toMasterSocket.send(msg, 0, msg.length, 8300, function(err) {
-        if (err) throw err;
-    });
+    server.keepAlive();
 });
 
 /*
@@ -247,6 +244,8 @@ io.on('connection',function(socket){
 
 server.setUpdateLoop = function(){
     setInterval(gs.updatePlayers,server.clientUpdateRate);
+    // ping master to keepAlive every 1.5 secs
+    setInterval(server.keepAlive, 1500);
 };
 
 server.sendInitializationPacket = function(socket,packet){
@@ -309,6 +308,13 @@ server.quickMedian = function(arr){ // Compute the median of an array using the 
     return arr[n];
 };
 
+server.keepAlive = function() {
+    let msg = new Buffer(server.address().port.toString());
+    toMasterSocket.send(msg, 0, msg.length, 8300, function(err) {
+        if (err) throw err;
+    });
+};
+
 // ================= UDP SOCKET
 
 udpSocket.on('listening', function() {
@@ -317,9 +323,8 @@ udpSocket.on('listening', function() {
 
 udpSocket.on('message', function(msg, info) {
     // DEBUG
-    console.log('Received on server side from UDP ====>', msg.toString(), info);
+    // console.log('Received on server side from UDP ====>', msg.toString(), info);
     // console.log(gs.players);
-    // TODO: Once chosen, offload to another server
     gs.pickPlayerToTransfer(msg.toString());
 });
 // Listen for commands from Master on 127.0.0.1:6060~6064

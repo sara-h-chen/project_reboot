@@ -47,6 +47,7 @@ var zeroIsPersistent = [false, false, false, false, false];
 // Track if servers are active
 // Initialize variables to calculate current workloads
 var serversActive = [false, false, false, false, false];
+let keptAlive = [false, false, false, false, false];
 var serversTotalCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
 var serversTotalLat = [0.0, 0.0, 0.0, 0.0, 0.0];
 var conn = [0, 0, 0, 0, 0];
@@ -133,8 +134,6 @@ app.get('/load', function(req,res) {
 
         // Maintain Fibonacci Heap only if dynamically load balancing
         maintainMinWorkloadServer();
-        // TODO: Pre-empt transfer if exceeds threshold
-        // TODO: Test workload evaluation function
     }
 
     // LOG
@@ -174,7 +173,6 @@ var pushInfo = function(channel, packet) {
     infoStack.push(JSON.parse(packet));
     // DEBUG
     // console.log('packet', packet);
-
 };
 sub.on('message', pushInfo);
 sub.subscribe('master');
@@ -184,7 +182,6 @@ function processUsage(callback) {
     pusage.stat(process.pid, function(err, stat) {
         benchmark['machine'] = server.address().port;
         benchmark['cpu'] = stat.cpu;
-        // TODO: Add memory benchmarking
         // benchmark['memory'] = stat.memory;
         benchmark['time'] = new Date().getTime() / 1000;
     });
@@ -197,12 +194,12 @@ function processUsage(callback) {
 function maintainMinWorkloadServer() {
     for (var server=0; server < serversActive.length; server++) {
         // If server has just become active, insert
-        if(serversActive[server] && !nodePointers[server]) {
+        if (serversActive[server] && !nodePointers[server]) {
             // Keep track of the inserted node for each server
             // K: Average workload, V: server
             nodePointers[server] = fibHeap.insert(chosenParameter[server], server);
         // If server has been active and has previous workload
-        } else if(serversActive[server]) {
+        } else if (serversActive[server] && keptAlive[server]) {
             if(chosenParameter[server] <= serversLastAvg[server]) {
                 // Breaks persistence of increase since it hasn't
                 increaseIsPersistent[server] = false;
@@ -235,8 +232,12 @@ function maintainMinWorkloadServer() {
                     continue;
                 }
             }
-
+        // if server has just become inactive but in Fib Heap
+        } else if (!keptAlive[server] && nodePointers[server]) {
+            fibHeap.delete(nodePointers[server]);
+            nodePointers[server] = undefined;
         }
+
         serversLastAvg[server] = chosenParameter[server];
     }
     // DEBUG
@@ -260,26 +261,7 @@ function sendCommand(preempt, portNumber, hostAddress) {
 io.on('connection', function(socket) {
     console.log('Gate has connected with ' + socket.id);
 
-    // REMOVED: Race condition
-    socket.on('check', function(portNumber) {
-        let num = Number(portNumber);
-        // DEBUG
-        // console.log(portNumber, serversActive, num, serversActive[num]);
-        // A race condition exists here
-        if(serversActive[num]){
-            socket.emit('ready', num);
-        } else {
-            let lastActiveServer = 0;
-            for (let serverOffset = 1; serverOffset < 3; serverOffset++) {
-                if (serversActive[num]) {
-                    lastActiveServer = Number(portNumber) + serverOffset;
-                } else if (serversActive[num]) {
-                    lastActiveServer = Number(portNumber) - serverOffset;
-                }
-            }
-            socket.emit('reroute', lastActiveServer);
-        }
-    });
+    setInterval(function() { checkInactivity(socket) }, 3000);
 
     socket.on('disconnect', function() {
         console.log('Gate has disconnected from the Master server.')
@@ -290,22 +272,22 @@ listenFromServers.on('listening', function() {
     console.log('Listening for activity from backend.')
 });
 listenFromServers.on('message', function(msg) {
-    console.log('received message from newly active server: ', Number(msg));
+    console.log('received message from active server: ', Number(msg));
     switch (Number(msg)) {
         case 6050:
-            serversActive[0] = true;
+            keptAlive[0] = true;
             break;
         case 6051:
-            serversActive[1] = true;
+            keptAlive[1] = true;
             break;
         case 6052:
-            serversActive[2] = true;
+            keptAlive[2] = true;
             break;
         case 6053:
-            serversActive[3] = true;
+            keptAlive[3] = true;
             break;
         case 6054:
-            serversActive[4] = true;
+            keptAlive[4] = true;
             break;
     }
 });
@@ -386,4 +368,20 @@ function ms2Time(ms) {
     minutes = Math.floor(minutes % 60);
     hours = Math.floor(hours % 24);
     return hours + ":" + minutes + ":" + secs + "." + ms;
+}
+
+// Check every 3 seconds for inactivity on any of the servers
+// Interval is large enough that not affected by dropped packet
+function checkInactivity(socket) {
+    for (let i=0; i < keptAlive.length; i++) {
+        if (!keptAlive[i]) {
+            serversActive[i] = false;
+            if (!fibHeap.isEmpty()) {
+                let minLoaded = fibHeap.findMinimum().value;
+                socket.emit('minLoad', JSON.stringify({index: i, sub: minLoaded}));
+            }
+            console.log('server inactive');
+        }
+        keptAlive[i] = false;
+    }
 }

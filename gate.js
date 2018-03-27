@@ -43,6 +43,12 @@ var serversToChooseFrom = [6050,6051,6052,6053,6054];
 var oneServer = undefined;
 var servAssignment = 0;
 
+/*
+ * For fault tolerance on dynamic load balancing
+ */
+var serversActive = [false,false,false,false,false];
+var substituteServers = [6051,6052,6053,6054,6053];
+
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
 
@@ -132,14 +138,13 @@ io.on('connection',function(socket){
 
     // =============== IN CASE OF COMPONENT FAILURE
     //
-    comms.on('ready', function() {
-        console.log('ready', servAssignment);
-        sendAssignment(socket, servAssignment);
-    });
-
-    comms.on('reroute', function(data) {
-        console.log('rerouted', data);
-        sendAssignment(socket, data);
+    // TODO: Replace in the substitute list above
+    // TODO: Make checks later on to send to substitute list
+    comms.on('minLoad', function(data) {
+        data = JSON.parse(data);
+        substituteServers[data.index] = 6050 + Number(data.sub);
+        // console.log('substitute', data);
+        console.log(substituteServers);
     });
 });
 
@@ -152,7 +157,6 @@ var getServerAssignment = function(socket, data) {
             let randomAllocation;
             if (!oneServer) {
                 randomAllocation = serversToChooseFrom[Math.floor(Math.random()*serversToChooseFrom.length)];
-                console.log('random ---->>', randomAllocation);
             } else {
                 randomAllocation = oneServer;
             }
@@ -180,8 +184,6 @@ var serverAssignment = function(socket, location) {
     } else {
         servAssignment = location;
     }
-    // Removed because of race condition
-    // checkIfActive(servAssignment);
     sendAssignment(socket, servAssignment);
 };
 
@@ -190,8 +192,4 @@ var sendAssignment = function(socket, portNumber) {
         portNumber: 6050 + Number(portNumber)
     };
     socket.emit('alloc', packet);
-};
-
-var checkIfActive = function(portNumber) {
-    comms.emit('check', portNumber);
 };
