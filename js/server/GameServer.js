@@ -36,7 +36,8 @@ var GameServer = {
     socketMap: {}, // map of socket id's to the player id's of the associated players
     IDmap: {}, // map of player id's to their mongodb uid's
     portNumber: 0,
-    otherPlayers: new Set()
+    otherPlayers: new Set(),
+    neighbors: []
 };
 
 // Allow server to store its own details
@@ -88,6 +89,9 @@ GameServer.readRedisPoints = function() {
     });
 };
 
+GameServer.trackNeighbors = function(neighborArray) {
+    GameServer.neighbors = neighborArray;
+};
 
 // A few helper functions
 GameServer.addPlayerID = function(socketID,playerID){ // map a socket id to a player id
@@ -635,7 +639,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         orientation: orientation
     };
     // Trigger handover to the adjacent servers
-    if ((path[path.length-1].y > serverAlloc.serverMax && !GameServer.otherPlayers.has(player.id)) || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
+    if (((path[path.length-1].y > serverAlloc.serverMax && !GameServer.otherPlayers.has(player.id)) || (transferNextIteration && player.id === playerClosestToBoundaries.id)) && GameServer.neighbors[1]) {
         // Reassign other player as playerClosestToNextServer
         if(playerClosestToNextServer && player.id === playerClosestToNextServer.id) {
             playerClosestToNextServer = undefined;
@@ -660,7 +664,7 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
         transferNextIteration = false;
 
     // IF (out of bounds and not a pre-empted player) OR (a pre-empted player)
-    } else if ((path[path.length-1].y < serverAlloc.serverMin && !GameServer.otherPlayers.has(player.id)) || (transferNextIteration && player.id === playerClosestToBoundaries.id)) {
+    } else if (((path[path.length-1].y < serverAlloc.serverMin && !GameServer.otherPlayers.has(player.id)) || (transferNextIteration && player.id === playerClosestToBoundaries.id)) && GameServer.neighbors[0]) {
         if(playerClosestToPreviousServer && player.id === playerClosestToPreviousServer.id) {
             playerClosestToPreviousServer = undefined;
         }

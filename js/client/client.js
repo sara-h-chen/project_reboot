@@ -8,7 +8,8 @@ var Client = {
     initEventName: 'init', // name of the event that triggers the call to initWorld() and the initialization of the game
     storageNameKey: 'playerName', // key in localStorage of the player name
     storageIDKey: 'playerID', // key in localStorage of player ID
-    startup: true
+    startup: true,
+    backupServers: [false, false, false, false, false]
 };
 Client.socket = io.connect();
 
@@ -97,6 +98,7 @@ Client.getName = function(){
 
 // Every time client receives alloc, it reconnects to another server
 Client.socket.on('alloc',function(packet) {
+    Client.backupServers = packet.subServers;
     Client.socketFunctions(packet);
 });
 
@@ -104,85 +106,98 @@ Client.socketFunctions = function(packet) {
     // DEBUG
     // console.log('reallocated', port);
     // console.log('Connecting to port ' + port);
-    Client.socket.disconnect();
-    console.log('Disconnected from server.');
-    Client.socket = io.connect('http://127.0.0.1:' + packet.portNumber + '/');
+    if (Client.backupServers[Number(packet.portNumber) - 6050]) {
+        Client.socket.disconnect();
+        console.log('Disconnected from server.');
+        Client.socket = io.connect('http://127.0.0.1:' + packet.portNumber + '/');
 
-    onevent = Client.socket.onevent;
+        let currentPort = packet.portNumber;
+        onevent = Client.socket.onevent;
 
-    // if disconnection due to transfer to another server;
-    // forward all information to the new server immediately so it can update
-    if (packet.toTransfer) {
-        Client.socket.emit('ponq',packet.stamp);
-        Client.socket.emit('transfer', packet);
+        // if disconnection due to transfer to another server;
+        // forward all information to the new server immediately so it can update
+        if (packet.toTransfer) {
+            Client.socket.emit('ponq',packet.stamp);
+            Client.socket.emit('transfer', packet);
+        }
+
+        // Request initialization only once when disconnecting from the gate
+        if (Client.startup) {
+            Client.requestData();
+            Client.startup = false;
+        }
+
+        // DEBUG
+        // Client.socket.on('test',function(data){
+        //     console.log('Received init response', data);
+        // });
+
+        Client.socket.on('pid',function(playerID){ // the 'pid' event is used for the server to tell the client what is the ID of the player
+            Client.setLocalData(playerID);
+        });
+
+        Client.socket.on(Client.initEventName,function(data){ // This event triggers when receiving the initialization packet from the server, to use in Game.initWorld()
+            if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.initializationSchema); // if in binary format, decode first
+            Client.socket.emit('ponq',data.stamp); // send back a pong stamp to compute latency
+            Game.initWorld(data);
+            Game.updateNbConnected(data.nbconnected);
+        });
+
+        Client.socket.on('update',function(data){ // This event triggers upon receiving an update packet (data)
+            if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.finalUpdateSchema); // if in binary format, decode first
+            Client.socket.emit('ponq',data.stamp);  // send back a pong stamp to compute latency
+            if(data.nbconnected !== undefined) Game.updateNbConnected(data.nbconnected);
+            if(data.latency) Game.setLatency(data.latency);
+            if(data.global) Game.updateWorld(data.global);
+            if(data.local) Game.updateSelf(data.local);
+        });
+
+        Client.socket.on('reset',function(data){
+            // If there is a mismatch between client and server coordinates, this event will reset the client to the server coordinates
+            // data contains the correct position of the player
+            Game.moveCharacter(Game.player.id,data,0,Game.latency);
+        });
+
+        Client.socket.on('dbError',function(){
+            // dbError is sent back from the server when the client attempted to connect by sending a player ID that has no match in the database
+            localStorage.clear();
+            Game.displayError();
+        });
+
+        Client.socket.on('wait',function(){
+            // wait is sent back from the server when the client attempts to connect before the server is done initializing and reading the map
+            console.log('Server not ready, re-attempting...');
+            setTimeout(Client.requestData, 500); // Just try again in 500ms
+        });
+
+        Client.socket.on('chat',function(data){
+            // chat is sent by the server when another nearby player has said something
+            Game.playerSays(data.id,data.txt);
+        });
+
+        Client.socket.on('alloc', function(packet) {
+            // console.log(packet);
+            if (packet.subServers) { Client.backupServers = packet.subServers; }
+            if (Client.backupServers[Number(packet.portNumber) - 6050]) {
+                Client.socketFunctions(packet);
+            }
+        });
+
+        Client.socket.on('latency', function(packet) {
+            Client.socket.emit('ponq', packet.stamp);
+        });
+
+        // Reconnect back to Gate server upon disconnection
+        Client.socket.on('disconnect', function() {
+            Client.socket = io.connect('http://127.0.0.1:8081');
+        });
+
+        Client.socket.on('connect_error', function(err) {
+            // handle server error here
+            Client.socket = io.connect('http://127.0.0.1:8081');
+            Client.socket.emit('reconnect', currentPort - 6050);
+        });
     }
-
-    // Request initialization only once when disconnecting from the gate
-    if (Client.startup) {
-        Client.requestData();
-        Client.startup = false;
-    }
-
-    // DEBUG
-    // Client.socket.on('test',function(data){
-    //     console.log('Received init response', data);
-    // });
-
-    Client.socket.on('pid',function(playerID){ // the 'pid' event is used for the server to tell the client what is the ID of the player
-        Client.setLocalData(playerID);
-    });
-
-    Client.socket.on(Client.initEventName,function(data){ // This event triggers when receiving the initialization packet from the server, to use in Game.initWorld()
-        if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.initializationSchema); // if in binary format, decode first
-        Client.socket.emit('ponq',data.stamp); // send back a pong stamp to compute latency
-        Game.initWorld(data);
-        Game.updateNbConnected(data.nbconnected);
-    });
-
-    Client.socket.on('update',function(data){ // This event triggers upon receiving an update packet (data)
-        if(data instanceof ArrayBuffer) data = Decoder.decode(data,CoDec.finalUpdateSchema); // if in binary format, decode first
-        Client.socket.emit('ponq',data.stamp);  // send back a pong stamp to compute latency
-        if(data.nbconnected !== undefined) Game.updateNbConnected(data.nbconnected);
-        if(data.latency) Game.setLatency(data.latency);
-        if(data.global) Game.updateWorld(data.global);
-        if(data.local) Game.updateSelf(data.local);
-    });
-
-    Client.socket.on('reset',function(data){
-        // If there is a mismatch between client and server coordinates, this event will reset the client to the server coordinates
-        // data contains the correct position of the player
-        Game.moveCharacter(Game.player.id,data,0,Game.latency);
-    });
-
-    Client.socket.on('dbError',function(){
-        // dbError is sent back from the server when the client attempted to connect by sending a player ID that has no match in the database
-        localStorage.clear();
-        Game.displayError();
-    });
-
-    Client.socket.on('wait',function(){
-        // wait is sent back from the server when the client attempts to connect before the server is done initializing and reading the map
-        console.log('Server not ready, re-attempting...');
-        setTimeout(Client.requestData, 500); // Just try again in 500ms
-    });
-
-    Client.socket.on('chat',function(data){
-        // chat is sent by the server when another nearby player has said something
-        Game.playerSays(data.id,data.txt);
-    });
-
-    Client.socket.on('alloc', function(packet) {
-        Client.socketFunctions(packet);
-    });
-
-    Client.socket.on('latency', function(packet) {
-        Client.socket.emit('ponq', packet.stamp);
-    });
-
-    // Reconnect back to Gate server upon disconnection
-    Client.socket.on('disconnect', function() {
-        Client.socket = io.connect('http://127.0.0.1:8081');
-    });
 };
 
 Client.sendPath = function(path,action,finalOrientation){

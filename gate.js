@@ -28,6 +28,7 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
+var bodyParser = require('body-parser');
 var mongo = require('mongodb').MongoClient;
 var fs = require('fs');
 var comms = require('socket.io-client').connect('http://127.0.0.1:8000');
@@ -47,7 +48,7 @@ var servAssignment = 0;
  * For fault tolerance on dynamic load balancing
  */
 var serversActive = [false,false,false,false,false];
-var substituteServers = [6051,6052,6053,6054,6053];
+var substituteServers = [1,2,3,4,3];
 
 var ObjectId = require('mongodb').ObjectId;
 var Player = require(__dirname + '/js/server/Player').Player;
@@ -55,7 +56,7 @@ var Player = require(__dirname + '/js/server/Player').Player;
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
 app.use('/assets',express.static(__dirname + '/assets'));
-
+app.use(bodyParser.json());
 
 app.get('/',function(req,res){
     res.sendFile(__dirname+'/index.html');
@@ -111,6 +112,7 @@ server.listen(myArgs.p || process.env.PORT || 8081,function(){ // -p flag to spe
 
 io.on('connection',function(socket){
     console.log('Gate connection with ID '+socket.id);
+
     socket.pings = [];
 
     socket.on('ponq',function(sentStamp){
@@ -125,9 +127,6 @@ io.on('connection',function(socket){
     });
 
     socket.on('init-world', function(data) {
-        // var callback = function(portNumber) {
-        //     sendAssignment(socket, portNumber);
-        // };
         getServerAssignment(socket, data);
     });
 
@@ -136,15 +135,26 @@ io.on('connection',function(socket){
         console.log('Disconnection with ID '+socket.id);
     });
 
+    // TODO: Reconnect
+    socket.on('reconnect', function(data) {
+        // DEBUG
+        console.log('received reconnection');
+        reconnectToBackend(socket, data);
+    });
+
     // =============== IN CASE OF COMPONENT FAILURE
-    //
-    // TODO: Replace in the substitute list above
-    // TODO: Make checks later on to send to substitute list
+    // maintains a list of substitute servers in case one goes down
     comms.on('minLoad', function(data) {
         data = JSON.parse(data);
-        substituteServers[data.index] = 6050 + Number(data.sub);
+        substituteServers[data.index] = Number(data.sub);
+        // DEBUG
         // console.log('substitute', data);
-        console.log(substituteServers);
+    });
+
+    // tracks the activity of all servers
+    comms.on('load', function(data) {
+        console.log(data);
+        serversActive = data;
     });
 });
 
@@ -184,12 +194,20 @@ var serverAssignment = function(socket, location) {
     } else {
         servAssignment = location;
     }
-    sendAssignment(socket, servAssignment);
+    if (serversActive[servAssignment]) {
+        // console.log('active', serversActive);
+        sendAssignment(socket, servAssignment);
+    } else {
+        // console.log('inactive', serversActive);
+        sendAssignment(socket, substituteServers[servAssignment]);
+    }
 };
 
 var sendAssignment = function(socket, portNumber) {
     var packet = {
-        portNumber: 6050 + Number(portNumber)
+        portNumber: 6050 + Number(portNumber),
+        subServers: serversActive
     };
     socket.emit('alloc', packet);
 };
+

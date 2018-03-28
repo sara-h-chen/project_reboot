@@ -53,6 +53,7 @@ var Encoder = require('./js/server/Encoder.js').Encoder;
 
 // For pushing status to master
 var benchmark = {};
+var isNeighborActive = [false, false];
 
 server.enableBinary = false;
 gs.server = server;
@@ -325,7 +326,15 @@ udpSocket.on('message', function(msg, info) {
     // DEBUG
     // console.log('Received on server side from UDP ====>', msg.toString(), info);
     // console.log(gs.players);
-    gs.pickPlayerToTransfer(msg.toString());
+    let parsedMsg = JSON.parse(msg.toString());
+    if (parsedMsg["plus1"] || parsedMsg["minus1"]) {
+        isNeighborActive[0] = parsedMsg["minus1"];
+        isNeighborActive[1] = parsedMsg["plus1"];
+        gs.trackNeighbors(isNeighborActive);
+    } else {
+        gs.pickPlayerToTransfer(msg.toString());
+    }
+    console.log(isNeighborActive);
 });
 // Listen for commands from Master on 127.0.0.1:6060~6064
 var listenOn = Number(server.address().port) + 10;

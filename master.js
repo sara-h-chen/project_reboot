@@ -185,7 +185,7 @@ listenFromServers.on('listening', function() {
     console.log('Listening for activity from backend.')
 });
 listenFromServers.on('message', function(msg) {
-    console.log('received message from active server: ', Number(msg));
+    // console.log('received message from active server: ', Number(msg));
     switch (Number(msg)) {
         case 6050:
             keptAlive[0] = true;
@@ -286,7 +286,23 @@ function ms2Time(ms) {
 // Check every 3 seconds for inactivity on any of the servers
 // Interval is large enough that not affected by dropped packet
 function checkInactivity(socket) {
+    socket.emit('load', keptAlive);
     for (let i=0; i < keptAlive.length; i++) {
+
+        if (keptAlive[i]) {
+            // synchronize with backend
+            let forBackend = {};
+            if (keptAlive[i - 1]) { forBackend['minus1'] = true; }
+            if (keptAlive[i + 1]) { forBackend['plus1'] = true; }
+            // DEBUG
+            // console.log(forBackend);
+            let msg = new Buffer(JSON.stringify(forBackend));
+            let port = (6060 + i);
+            udpSocket.send(msg, 0, msg.length, port, "127.0.0.1", function(err) {
+                if (err) throw err;
+            });
+        }
+
         if (!keptAlive[i]) {
             serversActive[i] = false;
             if (!fibHeap.isEmpty()) {
