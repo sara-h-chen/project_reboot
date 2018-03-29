@@ -9,7 +9,9 @@ var Client = {
     storageNameKey: 'playerName', // key in localStorage of the player name
     storageIDKey: 'playerID', // key in localStorage of player ID
     startup: true,
-    backupServers: [false, false, false, false, false]
+    backupServers: [false, false, false, false, false],
+    substitutes: [],
+    lastPath: {}
 };
 Client.socket = io.connect();
 
@@ -127,6 +129,10 @@ Client.socketFunctions = function(packet) {
             Client.startup = false;
         }
 
+        if (packet.sendPath) {
+            Client.socket.emit('crash', packet);
+        }
+
         // DEBUG
         // Client.socket.on('test',function(data){
         //     console.log('Received init response', data);
@@ -189,24 +195,49 @@ Client.socketFunctions = function(packet) {
 
         // Reconnect back to Gate server upon disconnection
         Client.socket.on('disconnect', function() {
-            Client.socket = io.connect('http://127.0.0.1:8081');
+            if (Client.substitutes[currentPort - 6050] != undefined && Client.backupServers[currentPort - 6050]) {
+                let dict = {
+                    sendPath: true,
+                    crashedPort: currentPort,
+                    portNumber: (Client.substitutes[currentPort - 6050] + 6050),
+                    name: Client.getName(),
+                    path: Client.lastPath,
+                    player: {
+                        id: Client.getPlayerID(),
+                        x: Client.lastPath.path[Client.lastPath.path.length - 1].x,
+                        y: Client.lastPath.path[Client.lastPath.path.length - 1].y
+                    }
+                };
+                // DEBUG
+                // console.log(dict);
+                Client.socketFunctions(dict);
+            } else {
+                console.log('No servers available');
+            }
         });
 
+        // upon server failure
         Client.socket.on('connect_error', function(err) {
             // handle server error here
-            Client.socket = io.connect('http://127.0.0.1:8081');
-            Client.socket.emit('reconnect', currentPort - 6050);
+            Client.socket.disconnect();
+        });
+
+        Client.socket.on('backup', function(data) {
+            Client.substitutes = data;
+            console.log(Client.substitutes);
         });
     }
 };
 
 Client.sendPath = function(path,action,finalOrientation){
     // Send the path that the player intends to travel
-    Client.socket.emit('path',{
+    let savedPath = {
         path:path,
         action:action,
         or:finalOrientation
-    });
+    };
+    Client.socket.emit('path',savedPath);
+    Client.lastPath = savedPath;
 };
 
 Client.sendChat = function(txt){

@@ -219,6 +219,13 @@ io.on('connection',function(socket){
         gs.receiveTransfer(data,socket);
     });
 
+    socket.on('crash', function(data) {
+        let callback = function() {
+            gs.addNewPlayer(true, socket, data);
+        };
+        gs.checkCrashEffect(data.crashedPort, callback);
+    });
+
     // Benchmark whenever a user is connected
     function processUsage() {
         pusage.stat(process.pid, function(err, stat) {
@@ -247,6 +254,7 @@ server.setUpdateLoop = function(){
     setInterval(gs.updatePlayers,server.clientUpdateRate);
     // ping master to keepAlive every 1.5 secs
     setInterval(server.keepAlive, 1500);
+    setInterval(gs.removeLock, 3000);
 };
 
 server.sendInitializationPacket = function(socket,packet){

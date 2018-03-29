@@ -37,11 +37,12 @@ var GameServer = {
     IDmap: {}, // map of player id's to their mongodb uid's
     portNumber: 0,
     otherPlayers: new Set(),
-    neighbors: []
+    neighbors: [] // left is previous, right is next
 };
 
 // Allow server to store its own details
 var serverAlloc;
+var lock = false;
 
 module.exports.GameServer = GameServer;
 module.exports.randomInt = randomInt;
@@ -81,6 +82,29 @@ GameServer.setup = function(portNumber) {
     }
 };
 
+GameServer.removeLock = function() {
+    lock = false;
+};
+
+GameServer.checkCrashEffect = function(crashedPort, callback) {
+    let neighborOffset = GameServer.portNumber - crashedPort;
+    // a neighboring server went down
+    // Lock immediately to prevent backlogged
+    // messages from changing this
+    if (neighborOffset == 1) {
+        GameServer.neighbors[0] = false;
+        // TODO: Think of ways to handle this
+        lock = true;
+    } else if (neighborOffset == -1) {
+        GameServer.neighbors[1] = false;
+        lock = true;
+    }
+    // DEBUG
+    // console.log('lock', lock);
+    // console.log('checkCrashEffect', GameServer.neighbors);
+    callback();
+};
+
 GameServer.readRedisPoints = function() {
     fs.readFile('./assets/json/redis_checkpoints.json', 'utf8', function (err, data) {
         if (err) throw err;
@@ -90,7 +114,9 @@ GameServer.readRedisPoints = function() {
 };
 
 GameServer.trackNeighbors = function(neighborArray) {
-    GameServer.neighbors = neighborArray;
+    if (!lock) {
+        GameServer.neighbors = neighborArray;
+    }
 };
 
 // A few helper functions
@@ -214,13 +240,11 @@ GameServer.readMap = function(){
     });
 };
 
-// TODO: Complete this
 // Reload to stress the right zones
 // DEFAULT: Randomized across zones
 GameServer.reloadStartPositions = function(scenarioChoice) {
     // 0: Redis zones
     // 1: Within a single server
-    // TODO: Implement everything after this line
     // 2: AI wandering
     // 3: Stress one; implemented on gate
     // 4: Complex bots
@@ -338,11 +362,23 @@ GameServer.addNewPlayer = function(isRedis,socket,data){
     // data is the data object sent by the client to request the creation of a new plaer
     if(!data.name || data.name.length == 0) return;
     var player = new Player(data.name);
+    if (data.sendPath) {
+        player.x = data.player.x;
+        player.y = data.player.y;
+        player.id = data.player.id;
+        GameServer.addPlayerID(socket.id,player.id);
+    }
+    // DEBUG
+    // console.log('modifiedplayer', player);
     var document = player.dbTrim();
     GameServer.server.db.collection('players').insertOne(document,function(err){
         if(err) throw err;
         var mongoID = document._id.toString(); // The Mongo driver for NodeJS appends the _id field to the original object reference
         player.setIDs(mongoID,socket.id);
+        if (data.sendPath) {
+            player.setIDs(data.player.id, socket.id);
+            player.id = data.player.id;
+        }
         GameServer.finalizePlayer(isRedis,socket,player);
         if(!isRedis) {
             GameServer.server.sendID(socket,mongoID);
@@ -393,6 +429,8 @@ GameServer.embedPlayer = function(isRedis,player){
     // Add the player to all the relevant data structures
     GameServer.players[player.id] = player;
     GameServer.nbConnectedChanged = true;
+    // DEBUG
+    // console.log('embedPlayer', GameServer.players[player.id]);
     GameServer.addAtLocation(isRedis,player);
     player.setLastSavedPosition();
 };
@@ -551,6 +589,8 @@ GameServer.handlePath = function(redisPub,originalPacket,path,action,orientation
     // orientation is a value between 1 and 4 indicating the orientation the player should have at the end of the path
     // socket is the socket of the client who sentt the path
     var player = GameServer.getPlayer(socket.id);
+    // DEBUG
+    // console.log('handlePath', player);
     if(!player || !player.alive) return false;
 
     if(path.length > 60){

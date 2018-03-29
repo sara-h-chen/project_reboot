@@ -115,6 +115,8 @@ io.on('connection',function(socket){
 
     socket.pings = [];
 
+    sendBackupList(socket);
+
     socket.on('ponq',function(sentStamp){
         // Compute a running estimate of the latency of a client each time an interaction takes place between client and server
         // The running estimate is the median of the last 20 sampled values
@@ -136,10 +138,9 @@ io.on('connection',function(socket){
     });
 
     // TODO: Reconnect
-    socket.on('reconnect', function(data) {
+    socket.on('reconnect', function() {
         // DEBUG
-        console.log('received reconnection');
-        reconnectToBackend(socket, data);
+        // console.log('received reconnection');
     });
 
     // =============== IN CASE OF COMPONENT FAILURE
@@ -211,3 +212,10 @@ var sendAssignment = function(socket, portNumber) {
     socket.emit('alloc', packet);
 };
 
+var sendBackupList = function(socket) {
+    let packet = [];
+    for (let i=0; i < serversActive.length; i++) {
+        packet[i] = (serversActive[i]) ? substituteServers[i] : undefined;
+    }
+    socket.emit('backup', packet);
+};

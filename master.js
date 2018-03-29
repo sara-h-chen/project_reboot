@@ -288,12 +288,15 @@ function ms2Time(ms) {
 function checkInactivity(socket) {
     socket.emit('load', keptAlive);
     for (let i=0; i < keptAlive.length; i++) {
-
         if (keptAlive[i]) {
             // synchronize with backend
             let forBackend = {};
-            if (keptAlive[i - 1]) { forBackend['minus1'] = true; }
-            if (keptAlive[i + 1]) { forBackend['plus1'] = true; }
+            if (keptAlive[i + 1]) {
+                forBackend['plus1'] = true;
+            }
+            if (keptAlive[i - 1]) {
+                forBackend['minus1'] = true;
+            }
             // DEBUG
             // console.log(forBackend);
             let msg = new Buffer(JSON.stringify(forBackend));
@@ -312,6 +315,8 @@ function checkInactivity(socket) {
             // DEBUG
             // console.log('server inactive');
         }
+    }
+    for (let i=0; i < keptAlive.length; i++) {
         keptAlive[i] = false;
     }
 }
