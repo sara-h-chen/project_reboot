@@ -11,7 +11,10 @@ function createBotClient(index, callback) {
         initEventName: 'init',
         storageNameKey: 'bot_' + index + 'Name',
         storageIDKey: 'bot_' + index + 'ID',
-        startup: true
+        startup: true,
+        backupServers: [false, false, false, false, false],
+        substitutes: [1,2,3,4,3],
+        lastPath: {}
     };
     BotClient.socket = io.connect('http://127.0.0.1:8081/');
 
@@ -67,64 +70,121 @@ function createBotClient(index, callback) {
     BotClient.socket.on('alloc',function(packet) {
         // DEBUG
         // console.log('received packet on bot', packet.portNumber);
+        BotClient.backupServers = packet.subServers;
         BotClient.socketFunctions(packet);
     });
 
     BotClient.socketFunctions = function(packet) {
-        // DEBUG
-        // console.log('bot connected and attempting to connect to ', packet.portNumber);
-        BotClient.socket.disconnect();
-        BotClient.socket = io.connect('http://127.0.0.1:' + packet.portNumber + '/');
+        if (BotClient.backupServers[Number(packet.portNumber) - 6050]) {
+            // DEBUG
+            // console.log('bot connected and attempting to connect to ', packet.portNumber);
+            BotClient.socket.disconnect();
+            BotClient.socket = io.connect('http://127.0.0.1:' + packet.portNumber + '/');
 
-        onevent = BotClient.socket.onevent;
+            let currentPort = packet.portNumber;
+            onevent = BotClient.socket.onevent;
 
-        if(packet.toTransfer) {
-            BotClient.socket.emit('ponq',packet.stamp);
-            BotClient.socket.emit('transfer', packet);
+            if (packet.toTransfer) {
+                BotClient.socket.emit('ponq', packet.stamp);
+                BotClient.socket.emit('transfer', packet);
+            }
+
+            if (BotClient.startup) {
+                BotClient.requestData();
+                BotClient.startup = false;
+            }
+
+            if (packet.sendPath) {
+                BotClient.socket.emit('crash', packet);
+            }
+
+            BotClient.socket.on(BotClient.initEventName, function(data) { // This event triggers when receiving the initialization packet from the server, to use in Game.initWorld()
+                if (data instanceof Buffer) data = Decoder.decode(toArrayBuffer(data), CoDec.initializationSchema); // if in binary format, decode first
+                BotClient.socket.emit('ponq', data.stamp); // send back a pong stamp to compute latency
+                callback(data.player, index);
+                // Game.initWorld(data);
+                // Game.updateNbConnected(data.nbconnected);
+            });
+
+            // TODO: Allow the bot to reset its position
+            BotClient.socket.on('reset', function(data) {
+                // If there is a mismatch between BotClient and server coordinates, this event will reset the BotClient to the server coordinates
+                // data contains the correct position of the player
+                // Game.moveCharacter(Game.player.id,data,0,Game.latency);
+            });
+
+            BotClient.socket.on('wait', function() {
+                // wait is sent back from the server when the BotClient attempts to connect before the server is done initializing and reading the map
+                // console.log('Server not ready, re-attempting...');
+                setTimeout(BotClient.requestData, 500); // Just try again in 500ms
+            });
+
+            BotClient.socket.on('alloc', function(packet) {
+                // UNCOMMENT: Simple behavior
+                // BotClient.socketFunctions(packet);
+
+                if (packet.subServers) { BotClient.backupServers = packet.subServers; }
+                if (BotClient.backupServers[Number(packet.portNumber) - 6050]) {
+                    BotClient.socketFunctions(packet);
+                }
+            });
+
+            BotClient.socket.on('latency', function(packet) {
+                BotClient.socket.emit('ponq', packet.stamp);
+            });
+
+            // UNCOMMENT: Simple, without fault tolerance
+            // BotClient.socket.on('disconnect', function() {
+            //     BotClient.socket = io.connect('http://127.0.0.1:8081');
+            // });
+
+            // Reconnect back to Gate server upon disconnection
+            BotClient.socket.on('disconnect', function() {
+                if (BotClient.substitutes[currentPort - 6050] != undefined && BotClient.backupServers[currentPort - 6050]) {
+                    let dict = {
+                        sendPath: true,
+                        crashedPort: currentPort,
+                        portNumber: (BotClient.substitutes[currentPort - 6050] + 6050),
+                        name: BotClient.storageNameKey,
+                        path: BotClient.lastPath,
+                        player: {
+                            id: BotClient.storageIDKey,
+                            x: BotClient.lastPath.path[BotClient.lastPath.path.length - 1].x,
+                            y: BotClient.lastPath.path[BotClient.lastPath.path.length - 1].y
+                        }
+                    };
+                    // DEBUG
+                    // console.log(dict);
+                    BotClient.socketFunctions(dict);
+                } else {
+                    console.log('No servers available');
+                }
+            });
+
+            // upon server failure
+            BotClient.socket.on('connect_error', function(err) {
+                // handle server error here
+                BotClient.socket.disconnect();
+            });
+
+            // TODO: Fix this
+            BotClient.socket.on('backup', function(data) {
+                console.log('received backup', data);
+                BotClient.substitutes = data;
+                console.log(BotClient.substitutes);
+            });
         }
-
-        if(BotClient.startup) {
-            BotClient.requestData();
-            BotClient.startup = false;
-        }
-
-        BotClient.socket.on(BotClient.initEventName,function(data){ // This event triggers when receiving the initialization packet from the server, to use in Game.initWorld()
-            if(data instanceof Buffer) data = Decoder.decode(toArrayBuffer(data),CoDec.initializationSchema); // if in binary format, decode first
-            BotClient.socket.emit('ponq',data.stamp); // send back a pong stamp to compute latency
-            callback(data.player, index);
-            // Game.initWorld(data);
-            // Game.updateNbConnected(data.nbconnected);
-        });
-
-        // TODO: Allow the bot to reset its position
-        BotClient.socket.on('reset',function(data){
-            // If there is a mismatch between BotClient and server coordinates, this event will reset the BotClient to the server coordinates
-            // data contains the correct position of the player
-            // Game.moveCharacter(Game.player.id,data,0,Game.latency);
-        });
-
-        BotClient.socket.on('wait',function(){
-            // wait is sent back from the server when the BotClient attempts to connect before the server is done initializing and reading the map
-            // console.log('Server not ready, re-attempting...');
-            setTimeout(BotClient.requestData, 500); // Just try again in 500ms
-        });
-
-        BotClient.socket.on('alloc', function(packet) {
-            BotClient.socketFunctions(packet);
-        });
-
-        BotClient.socket.on('latency', function(packet) {
-            BotClient.socket.emit('ponq', packet.stamp);
-        });
     };
 
     BotClient.sendPath = function(path,action,finalOrientation){
         // Send the path that the player intends to travel
-        BotClient.socket.emit('path',{
+        let savedPath = {
             path:path,
             action:action,
             or:finalOrientation
-        });
+        };
+        BotClient.socket.emit('path',savedPath);
+        BotClient.lastPath = savedPath;
     };
     return BotClient;
 }

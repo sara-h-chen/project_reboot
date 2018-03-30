@@ -11,7 +11,8 @@ var Client = {
     startup: true,
     backupServers: [false, false, false, false, false],
     substitutes: [],
-    lastPath: {}
+    lastPath: {},
+    crashed: false
 };
 Client.socket = io.connect();
 
@@ -201,30 +202,35 @@ Client.socketFunctions = function(packet) {
 
         // Reconnect back to Gate server upon disconnection
         Client.socket.on('disconnect', function() {
-            if (Client.substitutes[currentPort - 6050] != undefined && Client.backupServers[currentPort - 6050]) {
-                let dict = {
-                    sendPath: true,
-                    crashedPort: currentPort,
-                    portNumber: (Client.substitutes[currentPort - 6050] + 6050),
-                    name: Client.getName(),
-                    path: Client.lastPath,
-                    player: {
-                        id: Client.getPlayerID(),
-                        x: Client.lastPath.path[Client.lastPath.path.length - 1].x,
-                        y: Client.lastPath.path[Client.lastPath.path.length - 1].y
-                    }
-                };
-                // DEBUG
-                // console.log(dict);
-                Client.socketFunctions(dict);
+            if (Client.crashed) {
+                if (Client.substitutes[currentPort - 6050] != undefined && Client.backupServers[currentPort - 6050]) {
+                    let dict = {
+                        sendPath: true,
+                        crashedPort: currentPort,
+                        portNumber: (Client.substitutes[currentPort - 6050] + 6050),
+                        name: Client.getName(),
+                        path: Client.lastPath,
+                        player: {
+                            id: Client.getPlayerID(),
+                            x: Client.lastPath.path[Client.lastPath.path.length - 1].x,
+                            y: Client.lastPath.path[Client.lastPath.path.length - 1].y
+                        }
+                    };
+                    // DEBUG
+                    // console.log(dict);
+                    Client.socketFunctions(dict);
+                } else {
+                    console.log('No servers available');
+                }
             } else {
-                console.log('No servers available');
+                Client.socket = io.connect('http://127.0.0.1:8081');
             }
         });
 
         // upon server failure
         Client.socket.on('connect_error', function(err) {
             // handle server error here
+            Client.crashed = true;
             Client.socket.disconnect();
         });
 
