@@ -193,6 +193,12 @@ Client.socketFunctions = function(packet) {
             Client.socket.emit('ponq', packet.stamp);
         });
 
+
+        // UNCOMMENT: Simple, without fault tolerance
+        // Client.socket.on('disconnect', function() {
+        //     Client.socket = io.connect('http://127.0.0.1:8081');
+        // });
+
         // Reconnect back to Gate server upon disconnection
         Client.socket.on('disconnect', function() {
             if (Client.substitutes[currentPort - 6050] != undefined && Client.backupServers[currentPort - 6050]) {

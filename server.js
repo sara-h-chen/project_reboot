@@ -254,7 +254,6 @@ server.setUpdateLoop = function(){
     setInterval(gs.updatePlayers,server.clientUpdateRate);
     // ping master to keepAlive every 1.5 secs
     setInterval(server.keepAlive, 1500);
-    setInterval(gs.removeLock, 3000);
 };
 
 server.sendInitializationPacket = function(socket,packet){
@@ -336,13 +335,14 @@ udpSocket.on('message', function(msg, info) {
     // console.log(gs.players);
     let parsedMsg = JSON.parse(msg.toString());
     if (parsedMsg["plus1"] || parsedMsg["minus1"]) {
-        isNeighborActive[0] = parsedMsg["minus1"];
-        isNeighborActive[1] = parsedMsg["plus1"];
+        isNeighborActive[0] = (parsedMsg["minus1"] == true);
+        isNeighborActive[1] = (parsedMsg["plus1"] == true);
+        // console.log('isNeighborActive', isNeighborActive);
         gs.trackNeighbors(isNeighborActive);
     } else {
         gs.pickPlayerToTransfer(msg.toString());
     }
-    console.log(isNeighborActive);
+    // console.log('gsneighbors', gs.neighbors);
 });
 // Listen for commands from Master on 127.0.0.1:6060~6064
 var listenOn = Number(server.address().port) + 10;

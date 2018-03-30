@@ -37,12 +37,13 @@ var GameServer = {
     IDmap: {}, // map of player id's to their mongodb uid's
     portNumber: 0,
     otherPlayers: new Set(),
-    neighbors: [] // left is previous, right is next
+    neighbors: [], // left is previous, right is next
+    lock: false
 };
 
 // Allow server to store its own details
 var serverAlloc;
-var lock = false;
+var tolerateThreshold = 0;
 
 module.exports.GameServer = GameServer;
 module.exports.randomInt = randomInt;
@@ -83,25 +84,32 @@ GameServer.setup = function(portNumber) {
 };
 
 GameServer.removeLock = function() {
-    lock = false;
+    // console.log('removeLock', GameServer.lock);
+    if (tolerateThreshold < 5) {
+        tolerateThreshold += 1;
+        // console.log('tolerateThresh', tolerateThreshold);
+    } else {
+        GameServer.lock = false;
+        tolerateThreshold = 0;
+    }
 };
 
 GameServer.checkCrashEffect = function(crashedPort, callback) {
     let neighborOffset = GameServer.portNumber - crashedPort;
+    // console.log('neighborOffset', neighborOffset);
     // a neighboring server went down
     // Lock immediately to prevent backlogged
     // messages from changing this
     if (neighborOffset == 1) {
         GameServer.neighbors[0] = false;
-        // TODO: Think of ways to handle this
-        lock = true;
+        GameServer.lock = true;
     } else if (neighborOffset == -1) {
         GameServer.neighbors[1] = false;
-        lock = true;
+        GameServer.lock = true;
     }
     // DEBUG
-    // console.log('lock', lock);
-    // console.log('checkCrashEffect', GameServer.neighbors);
+    console.log('lock', GameServer.lock);
+    console.log('checkCrashEffect', GameServer.neighbors);
     callback();
 };
 
@@ -114,8 +122,15 @@ GameServer.readRedisPoints = function() {
 };
 
 GameServer.trackNeighbors = function(neighborArray) {
-    if (!lock) {
+    if (!GameServer.lock) {
+        // console.log('not locked', GameServer.lock, neighborArray);
         GameServer.neighbors = neighborArray;
+    }
+    // if there is a change then tolerate for 2 ticks
+    // console.log('trackNeighbors', neighborArray, GameServer.neighbors);
+    if (GameServer.neighbors[0] != neighborArray[0] || GameServer.neighbors[1] != neighborArray[1]) {
+        // console.log('trackNeighbors', GameServer.lock, GameServer.neighbors, neighborArray);
+        GameServer.removeLock();
     }
 };
 
