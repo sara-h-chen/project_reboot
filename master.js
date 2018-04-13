@@ -372,12 +372,12 @@ function doLoop() {
     }
 
     // LOG
-    let timeString = "Time: " + ms2Time(Date.now()) + "\n";
-    let stackString = "";
-    for (let i = 0; i < sendStack.length; i++) {
-        stackString = stackString + JSON.stringify(sendStack[i]) + "\n";
-    }
-    fs.appendFileSync("./logs/data.txt", timeString + stackString);
+    // let timeString = "Time: " + ms2Time(Date.now()) + "\n";
+    // let stackString = "";
+    // for (let i = 0; i < sendStack.length; i++) {
+    //     stackString = stackString + JSON.stringify(sendStack[i]) + "\n";
+    // }
+    // fs.appendFileSync("./logs/data.txt", timeString + stackString);
 
     var callback = function() {
         sendStack.push(benchmark);
