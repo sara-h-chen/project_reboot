@@ -7,7 +7,7 @@ connections = [[], [], [], [], []]
 cpu_usg = [[], [], [], [], []]
 lat_list = [[], [], [], [], []]
 
-with open('data.txt', 'r') as file_to_read:
+with open('final_data/fault_tolerance/no_fault_tolerance.txt', 'r') as file_to_read:
     for line in file_to_read.readlines():
         parsed = parse.parse(format_string, line)
         if not parsed:
