@@ -65,99 +65,7 @@ app.get('/',function(req,res){
 });
 
 app.get('/load', function(req,res) {
-    for (var i = 0; i < infoStack.length; i++) {
-        if (!infoStack[i].machine) {
-            continue;
-        }
-        switch (infoStack[i].machine) {
-            case 6050:
-                serversActive[0] = true;
-                serversTotalCpu[0] += infoStack[i].cpu;
-                serversTotalLat[0] += infoStack[i].latency;
-                conn[0] += 1;
-                break;
-            case 6051:
-                serversActive[1] = true;
-                serversTotalCpu[1] += infoStack[i].cpu;
-                serversTotalLat[1] += infoStack[i].latency;
-                conn[1] += 1;
-                break;
-            case 6052:
-                serversActive[2] = true;
-                serversTotalCpu[2] += infoStack[i].cpu;
-                serversTotalLat[2] += infoStack[i].latency;
-                conn[2] += 1;
-                break;
-            case 6053:
-                serversActive[3] = true;
-                serversTotalCpu[3] += infoStack[i].cpu;
-                serversTotalLat[3] += infoStack[i].latency;
-                conn[3] += 1;
-                break;
-            case 6054:
-                serversActive[4] = true;
-                serversTotalCpu[4] += infoStack[i].cpu;
-                serversTotalLat[4] += infoStack[i].latency;
-                conn[4] += 1;
-                break;
-            case 8000:
-                masterCpu = infoStack[i].cpu;
-                masterTime = infoStack[i].time.toString();
-                break;
-        }
-    }
-
-    var avgCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
-    var avgLat = [0.0, 0.0, 0.0, 0.0, 0.0];
-    for (var machine=0; machine < serversTotalCpu.length; machine++) {
-        avgCpu[machine] = (conn[machine] > 0) ? (serversTotalCpu[machine] / conn[machine]) : 0;
-        avgLat[machine] = (conn[machine] > 0) ? (serversTotalLat[machine] / conn[machine]) : 0;
-    }
-
-    sendStack.push({'machine': 6050, 'isActive': serversActive[0], 'conn': conn[0], 'cpu': avgCpu[0], 'lat': avgLat[0]});
-    sendStack.push({'machine': 6051, 'isActive': serversActive[1], 'conn': conn[1], 'cpu': avgCpu[1], 'lat': avgLat[1]});
-    sendStack.push({'machine': 6052, 'isActive': serversActive[2], 'conn': conn[2], 'cpu': avgCpu[2], 'lat': avgLat[2]});
-    sendStack.push({'machine': 6053, 'isActive': serversActive[3], 'conn': conn[3], 'cpu': avgCpu[3], 'lat': avgLat[3]});
-    sendStack.push({'machine': 6054, 'isActive': serversActive[4], 'conn': conn[4], 'cpu': avgCpu[4], 'lat': avgLat[4]});
-    // DEBUG
-    // console.log('sendStack', sendStack);
-
-    if(myArgs.d) {
-        if (myArgs.c) {
-            chosenParameter = avgCpu;
-        } else if (myArgs.l) {
-            chosenParameter = avgLat;
-        } else if (!myArgs.c && !myArgs.l) {
-            throw "Missing command line argument";
-        }
-
-        // Maintain Fibonacci Heap only if dynamically load balancing
-        maintainMinWorkloadServer();
-        // TODO: Pre-empt transfer if exceeds threshold
-        // TODO: Test workload evaluation function
-    }
-
-    // LOG
-    // let timeString = "Time: " + ms2Time(Date.now()) + "\n";
-    // let stackString = "";
-    // for (let i = 0; i < sendStack.length; i++) {
-    //     stackString = stackString + JSON.stringify(sendStack[i]) + "\n";
-    // }
-    // fs.appendFileSync("./logs/data.txt", timeString + stackString);
-
-    var callback = function() {
-        sendStack.push(benchmark);
-        res.send(JSON.stringify(sendStack));
-
-        // Clear variables after responding to client AJAX call
-        infoStack.splice(0, infoStack.length);
-        sendStack.splice(0, sendStack.length);
-        serversTotalCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
-        serversTotalLat = [0.0, 0.0, 0.0, 0.0, 0.0];
-        conn = [0, 0, 0, 0, 0];
-        masterCpu = 0.0;
-    };
-    processUsage(callback);
+    res.send(JSON.stringify(sendStack));
 });
 
 // -d flag specifies if dynamic load balancing is active;
@@ -167,6 +75,7 @@ server.listen(process.env.PORT || 8000, function() {
         console.log('The system will now run with dynamic load balancing. WARNING: Ensure you have either [c/l] as command line arguments to load balance by CPU USAGE or LATENCY.');
     }
     console.log('Master listening on ' + server.address().port);
+    setInterval(doLoop, 5000);
 });
 
 var pushInfo = function(channel, packet) {
@@ -386,4 +295,99 @@ function ms2Time(ms) {
     minutes = Math.floor(minutes % 60);
     hours = Math.floor(hours % 24);
     return hours + ":" + minutes + ":" + secs + "." + ms;
+}
+
+function doLoop() {
+    // Clear previous values
+    sendStack.splice(0, sendStack.length);
+
+    for (var i = 0; i < infoStack.length; i++) {
+        if (!infoStack[i].machine) {
+            continue;
+        }
+        switch (infoStack[i].machine) {
+            case 6050:
+                serversActive[0] = true;
+                serversTotalCpu[0] += infoStack[i].cpu;
+                serversTotalLat[0] += infoStack[i].latency;
+                conn[0] += 1;
+                break;
+            case 6051:
+                serversActive[1] = true;
+                serversTotalCpu[1] += infoStack[i].cpu;
+                serversTotalLat[1] += infoStack[i].latency;
+                conn[1] += 1;
+                break;
+            case 6052:
+                serversActive[2] = true;
+                serversTotalCpu[2] += infoStack[i].cpu;
+                serversTotalLat[2] += infoStack[i].latency;
+                conn[2] += 1;
+                break;
+            case 6053:
+                serversActive[3] = true;
+                serversTotalCpu[3] += infoStack[i].cpu;
+                serversTotalLat[3] += infoStack[i].latency;
+                conn[3] += 1;
+                break;
+            case 6054:
+                serversActive[4] = true;
+                serversTotalCpu[4] += infoStack[i].cpu;
+                serversTotalLat[4] += infoStack[i].latency;
+                conn[4] += 1;
+                break;
+            case 8000:
+                masterCpu = infoStack[i].cpu;
+                masterTime = infoStack[i].time.toString();
+                break;
+        }
+    }
+
+    var avgCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
+    var avgLat = [0.0, 0.0, 0.0, 0.0, 0.0];
+    for (var machine=0; machine < serversTotalCpu.length; machine++) {
+        avgCpu[machine] = (conn[machine] > 0) ? (serversTotalCpu[machine] / conn[machine]) : 0;
+        avgLat[machine] = (conn[machine] > 0) ? (serversTotalLat[machine] / conn[machine]) : 0;
+    }
+
+    sendStack.push({'machine': 6050, 'isActive': serversActive[0], 'conn': conn[0], 'cpu': avgCpu[0], 'lat': avgLat[0]});
+    sendStack.push({'machine': 6051, 'isActive': serversActive[1], 'conn': conn[1], 'cpu': avgCpu[1], 'lat': avgLat[1]});
+    sendStack.push({'machine': 6052, 'isActive': serversActive[2], 'conn': conn[2], 'cpu': avgCpu[2], 'lat': avgLat[2]});
+    sendStack.push({'machine': 6053, 'isActive': serversActive[3], 'conn': conn[3], 'cpu': avgCpu[3], 'lat': avgLat[3]});
+    sendStack.push({'machine': 6054, 'isActive': serversActive[4], 'conn': conn[4], 'cpu': avgCpu[4], 'lat': avgLat[4]});
+    // DEBUG
+    // console.log('sendStack', sendStack);
+
+    if(myArgs.d) {
+        if (myArgs.c) {
+            chosenParameter = avgCpu;
+        } else if (myArgs.l) {
+            chosenParameter = avgLat;
+        } else if (!myArgs.c && !myArgs.l) {
+            throw "Missing command line argument";
+        }
+
+        // Maintain Fibonacci Heap only if dynamically load balancing
+        maintainMinWorkloadServer();
+    }
+
+    // LOG
+    let timeString = "Time: " + ms2Time(Date.now()) + "\n";
+    let stackString = "";
+    for (let i = 0; i < sendStack.length; i++) {
+        stackString = stackString + JSON.stringify(sendStack[i]) + "\n";
+    }
+    fs.appendFileSync("./logs/data.txt", timeString + stackString);
+
+    var callback = function() {
+        sendStack.push(benchmark);
+
+        // Clear variables before next 5s iteration
+        infoStack.splice(0, infoStack.length);
+        serversTotalCpu = [0.0, 0.0, 0.0, 0.0, 0.0];
+        serversTotalLat = [0.0, 0.0, 0.0, 0.0, 0.0];
+        conn = [0, 0, 0, 0, 0];
+        masterCpu = 0.0;
+    };
+    processUsage(callback);
 }

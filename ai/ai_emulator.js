@@ -121,7 +121,7 @@ function wander(player, index) {
 
 totalBots = 50;
 for (var i = 0; i < totalBots; i++) {
-    // BotClients.push(createBotClient(i, doBotStuff));
-    BotClients.push(createBotClient(i, wander));
+    BotClients.push(createBotClient(i, doBotStuff));
+    // BotClients.push(createBotClient(i, wander));
     BotClients[i].requestData();
 }
