@@ -1,0 +1,402 @@
+Time: 11:56:45.872
+{"machine":6050,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6051,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6054,"isActive":false,"conn":0,"cpu":0,"lat":0}
+Time: 11:56:50.887
+{"machine":6050,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6051,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6054,"isActive":false,"conn":0,"cpu":0,"lat":0}
+Time: 11:56:55.892
+{"machine":6050,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6051,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6054,"isActive":false,"conn":0,"cpu":0,"lat":0}
+Time: 11:57:0.897
+{"machine":6050,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6051,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6054,"isActive":false,"conn":0,"cpu":0,"lat":0}
+Time: 11:57:5.901
+{"machine":6050,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6051,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6054,"isActive":false,"conn":0,"cpu":0,"lat":0}
+Time: 11:57:10.910
+{"machine":6050,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6051,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6054,"isActive":false,"conn":0,"cpu":0,"lat":0}
+Time: 11:57:15.917
+{"machine":6050,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6051,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6054,"isActive":true,"conn":1,"cpu":0.2,"lat":2.5}
+Time: 11:57:20.921
+{"machine":6050,"isActive":true,"conn":7,"cpu":31.199999999999996,"lat":131.64285714285714}
+{"machine":6051,"isActive":true,"conn":3,"cpu":20.5,"lat":155.83333333333334}
+{"machine":6052,"isActive":true,"conn":4,"cpu":24.7,"lat":121.375}
+{"machine":6053,"isActive":true,"conn":3,"cpu":19.2,"lat":121.33333333333333}
+{"machine":6054,"isActive":true,"conn":8,"cpu":5.525,"lat":50.3125}
+Time: 11:57:25.924
+{"machine":6050,"isActive":true,"conn":14,"cpu":7.150000000000004,"lat":10.428571428571429}
+{"machine":6051,"isActive":true,"conn":12,"cpu":7.324999999999997,"lat":7.875}
+{"machine":6052,"isActive":true,"conn":11,"cpu":6.627272727272725,"lat":6.7272727272727275}
+{"machine":6053,"isActive":true,"conn":8,"cpu":9.187500000000002,"lat":3.875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":4.285714285714286,"lat":4.071428571428571}
+Time: 11:57:30.932
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.792857142857142,"lat":10.642857142857142}
+{"machine":6051,"isActive":true,"conn":12,"cpu":5.25,"lat":8.5}
+{"machine":6052,"isActive":true,"conn":10,"cpu":1.0799999999999998,"lat":8.75}
+{"machine":6053,"isActive":true,"conn":8,"cpu":5.449999999999998,"lat":4.0625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.7857142857142856,"lat":4}
+Time: 11:57:35.941
+{"machine":6050,"isActive":true,"conn":14,"cpu":2.542857142857144,"lat":8.428571428571429}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.6000000000000005,"lat":7.791666666666667}
+{"machine":6052,"isActive":true,"conn":10,"cpu":4.28,"lat":6.65}
+{"machine":6053,"isActive":true,"conn":8,"cpu":0.7375000000000003,"lat":2.25}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.3857142857142857,"lat":3.9285714285714284}
+Time: 11:57:40.944
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.185714285714287,"lat":8.607142857142858}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.1416666666666675,"lat":7.958333333333333}
+{"machine":6052,"isActive":true,"conn":10,"cpu":1.8799999999999994,"lat":6.85}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.6749999999999998,"lat":2.75}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.5285714285714285,"lat":3.7857142857142856}
+Time: 11:57:45.951
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.528571428571427,"lat":8.428571428571429}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.975000000000001,"lat":7.541666666666667}
+{"machine":6052,"isActive":true,"conn":10,"cpu":4.340000000000001,"lat":6.8}
+{"machine":6053,"isActive":true,"conn":8,"cpu":3.6999999999999997,"lat":2.3125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.114285714285714,"lat":3.7857142857142856}
+Time: 11:57:50.956
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.142857142857143,"lat":8.821428571428571}
+{"machine":6051,"isActive":true,"conn":12,"cpu":6.233333333333334,"lat":7.833333333333333}
+{"machine":6052,"isActive":true,"conn":10,"cpu":2.960000000000001,"lat":6.9}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.325000000000001,"lat":2.875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.1714285714285713,"lat":3.857142857142857}
+Time: 11:57:55.964
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.8571428571428585,"lat":8.357142857142858}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.950000000000001,"lat":6.375}
+{"machine":6052,"isActive":true,"conn":10,"cpu":1.9799999999999998,"lat":5.95}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.7250000000000005,"lat":2.6875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.7285714285714289,"lat":3.7857142857142856}
+Time: 11:58:0.967
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.857142857142857,"lat":8.392857142857142}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.15,"lat":6.375}
+{"machine":6052,"isActive":true,"conn":10,"cpu":3.62,"lat":5.95}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.1875,"lat":2.875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.528571428571429,"lat":4.5}
+Time: 11:58:5.976
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.6000000000000005,"lat":7.535714285714286}
+{"machine":6051,"isActive":true,"conn":12,"cpu":6.383333333333332,"lat":5.75}
+{"machine":6052,"isActive":true,"conn":10,"cpu":3.8599999999999985,"lat":5.5}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.9000000000000001,"lat":2.75}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.5857142857142856,"lat":2.357142857142857}
+Time: 11:58:10.983
+{"machine":6050,"isActive":true,"conn":14,"cpu":3.4500000000000006,"lat":8.071428571428571}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.158333333333334,"lat":6.166666666666667}
+{"machine":6052,"isActive":true,"conn":10,"cpu":3.16,"lat":5.9}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.7125,"lat":3.1875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.214285714285715,"lat":2.9285714285714284}
+Time: 11:58:15.990
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.821428571428574,"lat":7.178571428571429}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.299999999999999,"lat":5.708333333333333}
+{"machine":6052,"isActive":true,"conn":10,"cpu":4.24,"lat":5.45}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.3374999999999995,"lat":3.0625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.4428571428571426,"lat":2.2142857142857144}
+Time: 11:58:20.998
+{"machine":6050,"isActive":true,"conn":14,"cpu":3.585714285714285,"lat":7.392857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":8.074999999999998,"lat":5.916666666666667}
+{"machine":6052,"isActive":true,"conn":10,"cpu":3.079999999999999,"lat":5.5}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.85,"lat":3.375}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.1142857142857143,"lat":2.2857142857142856}
+Time: 11:58:26.5
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.064285714285715,"lat":6.642857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":5.366666666666667,"lat":5.375}
+{"machine":6052,"isActive":true,"conn":10,"cpu":4.739999999999999,"lat":5.1}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.725,"lat":3.1875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.2857142857142856,"lat":2.0714285714285716}
+Time: 11:58:31.13
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.328571428571428,"lat":7.321428571428571}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.225000000000001,"lat":5.375}
+{"machine":6052,"isActive":true,"conn":10,"cpu":5.3199999999999985,"lat":5.3}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.8999999999999995,"lat":3.25}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.257142857142857,"lat":2.0714285714285716}
+Time: 11:58:36.19
+{"machine":6050,"isActive":true,"conn":14,"cpu":3.249999999999998,"lat":6.892857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.191666666666667,"lat":5.041666666666667}
+{"machine":6052,"isActive":true,"conn":10,"cpu":2.840000000000001,"lat":4.85}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.625000000000001,"lat":3}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.9857142857142855,"lat":2}
+Time: 11:58:41.32
+{"machine":6050,"isActive":true,"conn":14,"cpu":9.69285714285714,"lat":7.178571428571429}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.916666666666667,"lat":5.333333333333333}
+{"machine":6052,"isActive":true,"conn":10,"cpu":4.680000000000001,"lat":5}
+{"machine":6053,"isActive":true,"conn":8,"cpu":0.775,"lat":3.3125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.3,"lat":2}
+Time: 11:58:46.35
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.678571428571429,"lat":6.714285714285714}
+{"machine":6051,"isActive":true,"conn":12,"cpu":5.6000000000000005,"lat":5.041666666666667}
+{"machine":6052,"isActive":true,"conn":10,"cpu":4.220000000000001,"lat":4.7}
+{"machine":6053,"isActive":true,"conn":8,"cpu":5.062500000000001,"lat":2.9375}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.657142857142857,"lat":2}
+Time: 11:58:51.40
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.521428571428571,"lat":6.714285714285714}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.000000000000001,"lat":5.083333333333333}
+{"machine":6052,"isActive":true,"conn":10,"cpu":2.97,"lat":4.85}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.400000000000001,"lat":2.9375}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.2285714285714282,"lat":2}
+Time: 11:58:56.54
+{"machine":6050,"isActive":true,"conn":14,"cpu":3.6000000000000014,"lat":6.464285714285714}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.9249999999999994,"lat":4.458333333333333}
+{"machine":6052,"isActive":true,"conn":10,"cpu":3.6,"lat":4.7}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.900000000000001,"lat":2.6875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.9571428571428577,"lat":1.5}
+Time: 11:59:1.60
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.70714285714286,"lat":5.75}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.358333333333334,"lat":4.125}
+{"machine":6052,"isActive":true,"conn":10,"cpu":2.500000000000001,"lat":4.15}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.575000000000001,"lat":2.625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.542857142857143,"lat":1.2857142857142858}
+Time: 11:59:6.67
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.028571428571428,"lat":5.285714285714286}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.074999999999998,"lat":3.4583333333333335}
+{"machine":6052,"isActive":true,"conn":10,"cpu":3.8200000000000003,"lat":3.3}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.4375,"lat":2.0625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.3857142857142857,"lat":1.1428571428571428}
+Time: 11:59:11.74
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.535714285714286,"lat":5.107142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":5.208333333333333,"lat":3.375}
+{"machine":6052,"isActive":true,"conn":10,"cpu":3.2399999999999998,"lat":3.15}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.8499999999999996,"lat":2.0625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.371428571428571,"lat":1.1428571428571428}
+Time: 11:59:16.85
+{"machine":6050,"isActive":true,"conn":14,"cpu":15.400000000000004,"lat":5.107142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.1499999999999995,"lat":3.375}
+{"machine":6052,"isActive":true,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":18,"cpu":7.08888888888889,"lat":4.138888888888889}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.2857142857142858,"lat":1.1428571428571428}
+Time: 11:59:21.92
+{"machine":6050,"isActive":true,"conn":14,"cpu":2.6214285714285723,"lat":4.928571428571429}
+{"machine":6051,"isActive":true,"conn":12,"cpu":1.6416666666666668,"lat":3.375}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.3,"lat":2.375}
+{"machine":6054,"isActive":true,"conn":7,"cpu":6.985714285714287,"lat":1.1428571428571428}
+Time: 11:59:26.103
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.357142857142857,"lat":4.642857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":1.7666666666666666,"lat":3.2083333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.6624999999999996,"lat":2.3125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.4571428571428577,"lat":1}
+Time: 11:59:31.110
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.657142857142858,"lat":4.535714285714286}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.8333333333333335,"lat":3.0416666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.4375,"lat":2.0625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.4857142857142853,"lat":1}
+Time: 11:59:36.118
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.457142857142856,"lat":3.9285714285714284}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.2916666666666674,"lat":3.125}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.75,"lat":2.0625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.9142857142857146,"lat":1}
+Time: 11:59:41.128
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.164285714285714,"lat":3.642857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":0.8499999999999998,"lat":3.2083333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.2,"lat":2.125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.7142857142857146,"lat":1}
+Time: 11:59:46.138
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.921428571428572,"lat":3.5}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.8249999999999997,"lat":3.2083333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.1999999999999997,"lat":1.875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.8714285714285723,"lat":1.0714285714285714}
+Time: 11:59:51.147
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.928571428571429,"lat":3.3214285714285716}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.6583333333333337,"lat":3.2083333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.8499999999999996,"lat":1.875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.4571428571428564,"lat":1.0714285714285714}
+Time: 11:59:56.155
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.4642857142857135,"lat":3.3214285714285716}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.008333333333333,"lat":3.0833333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":0.8500000000000003,"lat":2.75}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.5428571428571423,"lat":1.0714285714285714}
+Time: 12:0:1.161
+{"machine":6050,"isActive":true,"conn":14,"cpu":3.77857142857143,"lat":3.642857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.1999999999999997,"lat":3.75}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.9875,"lat":3.125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.114285714285714,"lat":1.0714285714285714}
+Time: 12:0:6.168
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.971428571428571,"lat":3.642857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":1.6583333333333334,"lat":3.75}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.9999999999999993,"lat":3.25}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.6714285714285717,"lat":1}
+Time: 12:0:11.181
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.371428571428571,"lat":3.6785714285714284}
+{"machine":6051,"isActive":true,"conn":12,"cpu":5.208333333333332,"lat":3.875}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.3875,"lat":3.1875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.2857142857142856,"lat":1}
+Time: 12:0:16.186
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.057142857142855,"lat":3.642857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.9,"lat":3.6666666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.2375000000000003,"lat":3.3125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.8142857142857145,"lat":1}
+Time: 12:0:21.190
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.4785714285714295,"lat":3.4642857142857144}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.441666666666667,"lat":3.3333333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.0375,"lat":3.375}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.6000000000000005,"lat":0.9285714285714286}
+Time: 12:0:26.196
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.571428571428571,"lat":3.5357142857142856}
+{"machine":6051,"isActive":true,"conn":12,"cpu":1.2499999999999998,"lat":3.375}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":0.8374999999999998,"lat":3.3125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.4857142857142853,"lat":1}
+Time: 12:0:31.201
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.814285714285717,"lat":3.5357142857142856}
+{"machine":6051,"isActive":true,"conn":12,"cpu":1.6250000000000002,"lat":3.375}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.7875000000000003,"lat":3.5}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.228571428571428,"lat":1}
+Time: 12:0:36.206
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.8357142857142845,"lat":3.5}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.9749999999999996,"lat":3.375}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.425,"lat":3.4375}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.2142857142857144,"lat":0.9285714285714286}
+Time: 12:0:41.214
+{"machine":6050,"isActive":true,"conn":14,"cpu":3.9142857142857155,"lat":3.5}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.9083333333333328,"lat":3.5416666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.0125,"lat":3.3125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.7714285714285716,"lat":0.9285714285714286}
+Time: 12:0:46.222
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.321428571428574,"lat":3.5}
+{"machine":6051,"isActive":true,"conn":12,"cpu":1.9333333333333338,"lat":3.4583333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.6625000000000003,"lat":3.3125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.8285714285714283,"lat":0.9285714285714286}
+Time: 12:0:51.226
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.8357142857142845,"lat":3.392857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.016666666666667,"lat":3.4583333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.9125,"lat":3.25}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.271428571428572,"lat":0.9285714285714286}
+Time: 12:0:56.229
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.292857142857142,"lat":3.357142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.0833333333333335,"lat":3.4583333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.05,"lat":3.1875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.1999999999999997,"lat":0.8571428571428571}
+Time: 12:1:1.236
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.757142857142855,"lat":3.3214285714285716}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.233333333333334,"lat":3.4583333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.9375,"lat":3.1875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.4285714285714284,"lat":0.8571428571428571}
+Time: 12:1:6.241
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.221428571428571,"lat":3.2142857142857144}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.8666666666666676,"lat":3.2916666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.1374999999999997,"lat":3.1875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.8714285714285714,"lat":0.8571428571428571}
+Time: 12:1:11.249
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.085714285714286,"lat":3.0714285714285716}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.775000000000001,"lat":3.2916666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.4500000000000002,"lat":3.1875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":1.9142857142857141,"lat":0.8571428571428571}
+Time: 12:1:16.252
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.228571428571429,"lat":2.9642857142857144}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.9083333333333337,"lat":3.2083333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.4,"lat":3.0625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.4857142857142853,"lat":0.7857142857142857}
+Time: 12:1:21.256
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.414285714285714,"lat":2.8214285714285716}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.575,"lat":3.125}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.45,"lat":3}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.8285714285714287,"lat":0.7857142857142857}
+Time: 12:1:26.259
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.092857142857141,"lat":2.857142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.0000000000000004,"lat":3.0833333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.25,"lat":2.9375}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.814285714285714,"lat":0.7857142857142857}
+Time: 12:1:31.268
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.214285714285716,"lat":2.607142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.749999999999999,"lat":3.0833333333333335}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.6375000000000002,"lat":2.8125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.871428571428571,"lat":0.7142857142857143}
+Time: 12:1:36.277
+{"machine":6050,"isActive":true,"conn":14,"cpu":7.728571428571428,"lat":2.357142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":5.1833333333333345,"lat":3}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":4.425,"lat":2.6875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":4.028571428571428,"lat":0.7142857142857143}
+Time: 12:1:41.281
+{"machine":6050,"isActive":true,"conn":14,"cpu":5.0928571428571425,"lat":2.392857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.933333333333333,"lat":2.875}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.6125,"lat":2.625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.742857142857143,"lat":0.7142857142857143}
+Time: 12:1:46.289
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.557142857142856,"lat":2.3214285714285716}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.458333333333334,"lat":2.6666666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.3124999999999996,"lat":2.5625}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.9285714285714293,"lat":0.7857142857142857}
+Time: 12:1:51.298
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.95,"lat":2.357142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":4.008333333333334,"lat":2.375}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":3.5249999999999995,"lat":1.8125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.6571428571428575,"lat":0.7142857142857143}
+Time: 12:1:56.307
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.778571428571427,"lat":2.357142857142857}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.5416666666666665,"lat":2.2916666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":1.5374999999999996,"lat":1.75}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.471428571428571,"lat":0.7142857142857143}
+Time: 12:2:1.316
+{"machine":6050,"isActive":true,"conn":14,"cpu":6.107142857142857,"lat":2.392857142857143}
+{"machine":6051,"isActive":true,"conn":12,"cpu":2.9916666666666667,"lat":2.25}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.3,"lat":1.6875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.442857142857143,"lat":0.7857142857142857}
+Time: 12:2:6.323
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.350000000000001,"lat":2.4285714285714284}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.658333333333333,"lat":2.25}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.025,"lat":1.6875}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.4285714285714284,"lat":0.7142857142857143}
+Time: 12:2:11.329
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.371428571428571,"lat":2.4642857142857144}
+{"machine":6051,"isActive":true,"conn":12,"cpu":0.9249999999999997,"lat":2.25}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":0.8250000000000003,"lat":1.8125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":2.6000000000000005,"lat":0.7142857142857143}
+Time: 12:2:16.337
+{"machine":6050,"isActive":true,"conn":14,"cpu":4.428571428571429,"lat":2.5}
+{"machine":6051,"isActive":true,"conn":12,"cpu":3.6833333333333336,"lat":2.2916666666666665}
+{"machine":6052,"isActive":false,"conn":0,"cpu":0,"lat":0}
+{"machine":6053,"isActive":true,"conn":8,"cpu":2.75,"lat":1.8125}
+{"machine":6054,"isActive":true,"conn":7,"cpu":3.6,"lat":0.7857142857142857}
