@@ -1,59 +1,96 @@
-# phaserquest
+# Load Balancing for Virtual Environments in Distributed Systems (3rd Year Project)
+This is the source code accompanying the project.
 
-Phaser Quest is a reproduction of Mozilla's [Browserquest](http://browserquest.mozilla.org/) using the following tools:
-- The [Phaser](https://phaser.io/) framework for the client 
-- [Socket.io](http://socket.io/) and [Node.js](https://nodejs.org/en/) for the server and client-server communication
+## Installation
+To get up and running, the following tools need to be installed:
+- Node.js
+- MongoDB
+- Redis
+- Git
 
-## Quick tour of the code
+### Node.js
+Node.js v8.7.0 was used in the building and testing of this code. It runs the backend of the cluster. To install Node.js, you can either install it straight into your system, or use `nvm` to manage your Node versions.
 
-### Client
+To install and use `nvm`, the instructions can be found [here](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-with-nvm-node-version-manager-on-a-vps).
 
-The game canvas and the game states are created in `js/client/main.js`. The `Home` state is started first, and will display the home page
-of the game. The `Game` state is started upon calling `startGame()` from the `Home` state. 
+Otherwise, install Node.js according to your own architecture, following the instructions that can be found [here](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions).
 
-`js/client/game.js` contains the  `Game` object, which corresponds to the `Game` state and contains the bulk of the client code. 
-`Game.init()` is automatically called first by Phaser, to initialize a few variables. `Game.preload()` is then called, to load the
-assets that haven't been loaded in the `Home` state. When all assets are loaded, Phaser calls `Game.create()` where the basics of the game
-are set up. At the end of `Game.create()`, a call is made to `Client.requestData()` (from `js/client/client.js`) to request initialization
-data from the server. Upon reception of this data, `Game.initWorld()` is called, which finishes starting the game. The main update loop of the client is `Game.update()`. 
+Before beginning, ensure that you use the right version of Node.js. To check your Node version, use the following command:
 
-### Server and updates
+    node -v
 
-`server.js` is the Node.js server that supports the game. Most of the server-side game logic however is located in `js/server/GameServer.js`. Every 200ms, `GameServer.updatePlayers()` is called, and sends updates to all clients (if there are updates to send, as determined by the custom interest management system). Client-side, these updates are processed by `Game.updateWorld()` and `Game.updateSelf()`. 
+Once Node.js has been installed, the Node packages that accompany this project have to be installed onto your local system. To do so, run the following command:
 
-The code used for the custom binary protocol for the exchange of update packets can be found in `js/client/Decoder.js`, `js/server/Encoder.js` and `js/CODec.js`.
+    npm install
 
-## Installing and running the game
+This will download all the code dependencies required for the project that are listed out in `packages.json`.
 
-For the client, everything is included in the code (`phaser.js`, `easystar.min.js`, ...). You will need [npm](https://www.npmjs.com/) to install the Node.js packages required for the server. To run the server, you'll need to have Node.js installed, as well as [MongoDB](https://www.mongodb.com/).
+### MongoDB
+MongoDB is used to manage the database, and you can follow the installation instructions [here](https://docs.mongodb.com/manual/installation/).
 
-Clone the repository. Inside the newly created directory, run `npm install` to install the Node.js packages listed in `package.json`. Make sure that you have MongoDB running, then run `node server.js` to start the game server. 
-By default, it'll listen to connections on port `8081`; you can change that behaviour by using the `-p` flag (e.g. `node server.js -p 80`). 
-By default, it'll attempt to connect to MongoDB on port `27017`; you can change that behaviour by using the `--mongoPort` flag (e.g. `node server.js --mongoPort 25000`).
+The MongoDB server has to be started manually on the command line, using the following command:
 
-### Using Docker
+    mongod
 
-Alternatively, you can use the Dockerfile to create a container with all the necessary components already installed (thanks to Martin kramer for the corresponding pull request). You need to have [Docker](https://www.docker.com) installed. Then, in the directory where you clones the project, run:
+By default, `mongodb` starts on Port `27017`, so please ensure that this port is free before attempting to run the code.
 
-```
-docker-compose build
-```
-```
-docker-compose up -d
-```
+### Redis
+Redis is used solely as a Message Queue in this project. Installation instructions can be found [here](https://redis.io/download).
 
-The default por when using the Docker way is `80`, so you need to navigate to `<IP_of_your_Docker_machine>:80` to be able to access the game (e.g. 192.168.99.100:80). 
+Once installed, the Redis server has to be started on the command line, using the following command:
 
-## Modifying the map
+    redis-server
 
-In `assets/maps/`, you can find `phaserquest_map.tmx`, which is the Tiled file of the map of the game, to be edited with the [Tiled Map Editor](http://www.mapeditor.org/). One you have made modifications in the Tiled file, you need to export it as a JSON file. But that file will contain a lot of layers, a legacy from how the original Browserquest map was designed. A lot of layers will translate to a very poor performance with Phaser, which is a shame since most of these layers contain only a few tiles. The solution is to "flatten" them to cram as many tiles as possible in the same layers. You can do so by running `formatMap()` from `js/server/format.js`. It will look for a `map.json` file in `assets/maps` and output two new files, the flattened map files for the client and the server.
+### Git
+Git is the version control system used throughout development for this project. The `.git` folder is required to switch branches to activate specific functionality. Git can be installed following the instructions [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
-## Further documentation
+The `demo` branch contains largely stable code, and was used for the purposes of demonstration of functionality. The `dynamic` branch has integrated fault tolerance; however, the code is unstable.
 
-I have written and will keep writing articles about some development aspects of the game. The full list of existing articles is available [here](http://www.dynetisgames.com/tag/phaser-quest/).
+## Starting Up
+**WARNING:** Please ensure that both the MongoDB and Redis servers have started before attempting to deploy the cluster. The code will not work otherwise.
 
-Here is the detail of the topics covered so far:
-- [Clients synchronization](http://www.dynetisgames.com/2017/03/19/client-updates-phaser-quest/)
-- [Latency estimation](http://www.dynetisgames.com/2017/03/19/latency-estimation-phaser-quest/)
-- [Interest management](http://www.dynetisgames.com/2017/03/19/latency-estimation-phaser-quest/) (the "AOI" stuff you might encounter in the code)
-- [Custom Binary Protocol](http://www.dynetisgames.com/2017/06/14/custom-binary-protocol-javascript/)
+The components in the cluster have to be deployed in the following order:
+1. MongoDB, Redis
+2. Master
+3. Gate
+4. Logic
+
+The master server is initialized on port **8000**. To start the master server with simple static load balancing (the default), simply run the following command on a terminal session:
+
+    node master.js
+
+However, to activate the dynamic load balancing, the following parameters have to be added to the command:
+
+    node master.js -dc
+
+The gate server by default allows for clients to be allocated to all active servers. However, for the purposes of testing, the gate server may also restrict allocation to only one server, using the following command:
+
+    node gate.js -oo
+
+To start the gate without this restriction, simply use the same command without the `-oo` flag.
+
+The code currently relies on the logic servers being on the following ports: **6050, 6051, 6052, 6053, 6054**. Please ensure that the ports listed are available before attempting to run the code. Each server has to be started on an individual terminal session, using the following command:
+
+    node server.js PORT=605X
+
+where `X` refers to the server number.
+
+The cluster should now be running, and the virtual environment can now be accessed from `localhost:8080`. To monitor the status of the cluster, the master server provides a web interface on `localhost:8000`.
+
+### AI Bots
+The AI bots are stored within the `ai/` directory. They come with 2 modes of behavior: simple and complex.
+
+To activate the bots, go to the `ai_emulator.js` file, and look at Line 124 and 125 of the code:
+
+    totalBots = 50;
+    for (var i = 0; i < totalBots; i++) {
+        // BotClients.push(createBotClient(i, doBotStuff));
+        BotClients.push(createBotClient(i, wander));
+        BotClients[i].requestData();
+    }
+
+The AI behavior is specified by the `push()` function, where `doBotStuff` specifies for the bots to be initialized with simple behavior, while `wander` specifies complex behavior. Ensure that the chosen bot behavior has been uncommented.
+
+To increase or decrease the number of bots, simply change the integer number being passed to the `totalBots` variable.
+
+The bots' behavior can be observed on `localhost:8075`.
